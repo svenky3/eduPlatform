@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Education Platform Suite</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+        
+        .landing-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 50px;
+            max-width: 900px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+        
+        .main-title {
+            font-size: 3.5em;
+            color: #667eea;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .main-subtitle {
+            font-size: 1.3em;
+            color: #666;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+        
+        .platforms-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 40px 0;
+        }
+        
+        .platform-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            border: 3px solid transparent;
+            transition: all 0.4s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .platform-card:hover {
+            transform: translateY(-10px);
+            border-color: #667eea;
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.2);
+        }
+        
+        .platform-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            display: block;
+        }
+        
+        .platform-title {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .platform-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .platform-features {
+            list-style: none;
+            text-align: left;
+            margin: 20px 0;
+        }
+        
+        .platform-features li {
+            padding: 5px 0;
+            color: #555;
+        }
+        
+        .platform-features li::before {
+            content: "✅ ";
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .access-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        
+        .access-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .access-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .access-btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 1em;
+        }
+        
+        .btn-student {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+        
+        .btn-teacher {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .btn-admin {
+            background: linear-gradient(135deg, #dc3545, #fd7e14);
+            color: white;
+        }
+        
+        .access-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .info-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+        
+        .info-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: left;
+            border-left: 4px solid #667eea;
+        }
+        
+        .info-card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .info-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #e9ecef;
+            color: #666;
+        }
+        
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 15px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        @media (max-width: 768px) {
+            .platforms-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .main-title {
+                font-size: 2.5em;
+            }
+            
+            .landing-container {
+                padding: 30px;
+            }
+            
+            .stats-bar {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="landing-container">
+        <h1 class="main-title">🎓 Education Platform Suite</h1>
+        <p class="main-subtitle">
+            Comprehensive learning solutions for SAT preparation and high school education. 
+            Interactive, engaging, and designed for student success.
+        </p>
+        
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-number">2</div>
+                <div class="stat-label">Platforms</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">6+</div>
+                <div class="stat-label">Subjects</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">2</div>
+                <div class="stat-label">Quiz Formats</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">Secure</div>
+            </div>
+        </div>
+        
+        <div class="platforms-grid">
+            <a href="sat-prep.html" class="platform-card">
+                <span class="platform-icon">🎯</span>
+                <h2 class="platform-title">SAT Prep Platform</h2>
+                <p class="platform-description">
+                    Focused test preparation with traditional quizzes and engaging Jeopardy-style games.
+                </p>
+                <ul class="platform-features">
+                    <li>Reading & Math preparation</li>
+                    <li>Traditional + Jeopardy formats</li>
+                    <li>Score tracking & analytics</li>
+                    <li>Practice test simulations</li>
+                    <li>Progress monitoring</li>
+                </ul>
+            </a>
+            
+            <a href="high-school.html" class="platform-card">
+                <span class="platform-icon">📚</span>
+                <h2 class="platform-title">High School Learning</h2>
+                <p class="platform-description">
+                    Comprehensive curriculum support across all major high school subjects.
+                </p>
+                <ul class="platform-features">
+                    <li>6 core subjects covered</li>
+                    <li>Interactive labs & simulations</li>
+                    <li>Assignment management</li>
+                    <li>Grade tracking</li>
+                    <li>Study planning tools</li>
+                </ul>
+            </a>
+        </div>
+        
+        <div class="access-section">
+            <h2 class="access-title">🔐 Secure Access</h2>
+            <p style="color: #666; margin-bottom: 25px;">
+                Choose your role to access the appropriate dashboard and features.
+                All access is secured with Gmail authentication.
+            </p>
+            
+            <div class="access-buttons">
+                <a href="sat-prep.html" class="access-btn btn-student">
+                    👥 Student Access
+                </a>
+                <a href="#" class="access-btn btn-teacher" onclick="alert('Teacher portal coming soon!')">
+                    👨‍🏫 Teacher Access
+                </a>
+                <a href="#" class="access-btn btn-admin" onclick="alert('Admin dashboard coming soon!')">
+                    ⚙️ Admin Dashboard
+                </a>
+            </div>
+        </div>
+        
+        <div class="info-section">
+            <div class="info-card">
+                <h3>🛡️ Security & Privacy</h3>
+                <p>
+                    Gmail authentication ensures only invited students and authorized teachers can access the platform. 
+                    All data is encrypted and secure.
+                </p>
+            </div>
+            
+            <div class="info-card">
+                <h3>📊 Progress Tracking</h3>
+                <p>
+                    Comprehensive analytics help students understand their strengths and areas for improvement 
+                    across all subjects and skill areas.
+                </p>
+            </div>
+            
+            <div class="info-card">
+                <h3>🎮 Engaging Learning</h3>
+                <p>
+                    Multiple learning formats including traditional quizzes, Jeopardy games, simulations, 
+                    and interactive labs keep students motivated.
+                </p>
+            </div>
+            
+            <div class="info-card">
+                <h3>👨‍🏫 Teacher Tools</h3>
+                <p>
+                    Powerful admin dashboards for managing students, creating assignments, tracking progress, 
+                    and communicating with parents.
+                </p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>📧 Need Access?</strong> Contact your instructor for an invitation to join the platform.</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">
+                <strong>📞 Support:</strong> For technical issues or questions, please contact your school's IT department.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Add some interactive elements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add hover effects to platform cards
+            const platformCards = document.querySelectorAll('.platform-card');
+            
+            platformCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-10px) scale(1.02)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+            
+            // Add click tracking for analytics
+            const accessButtons = document.querySelectorAll('.access-btn');
+            accessButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const role = this.textContent.trim();
+                    console.log(`Access attempt: ${role}`);
+                });
+            });
+        });
+        
+        // Simple animation for stats
+        function animateStats() {
+            const statNumbers = document.querySelectorAll('.stat-number');
+            
+            statNumbers.forEach((stat, index) => {
+                const finalNumber = stat.textContent;
+                let currentNumber = 0;
+                const increment = finalNumber.includes('%') ? 5 : 1;
+                const target = parseInt(finalNumber);
+                
+                const timer = setInterval(() => {
+                    currentNumber += increment;
+                    if (currentNumber >= target) {
+                        currentNumber = target;
+                        clearInterval(timer);
+                    }
+                    stat.textContent = currentNumber + (finalNumber.includes('%') ? '%' : '');
+                }, 50);
+            });
+        }
+        
+        // Start animations when page loads
+        setTimeout(animateStats, 1000);
+    </script>
+</body>
+</html>
