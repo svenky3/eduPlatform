@@ -446,10 +446,10 @@
 
         // 🔐 AUTHORIZED EMAILS - ADD YOUR STUDENTS HERE
         const authorizedEmails = [
-            'svenky3@gmail.com',        // Replace with your email
-            'aneeshjax@gmail.com',         // Add your students' emails here
-            'ashwinjax@gmail.com',          // Add more students as needed
-            'mythiliVenky@gmail.com',          // Add teacher emails
+            'your-email@gmail.com',        // Replace with your email
+            'student1@school.edu',         // Add your students' emails here
+            'student2@gmail.com',          // Add more students as needed
+            'teacher@school.edu',          // Add teacher emails
             // Add more authorized emails below
         ];
 
@@ -648,16 +648,38 @@
         }
 
         function displayQuiz() {
+            console.log('Starting displayQuiz function');
+            console.log('Current quiz:', currentQuiz);
+            
+            // Hide dashboard and show quiz container
             document.getElementById('mainContainer').style.display = 'none';
             document.getElementById('quizContainer').style.display = 'block';
             
+            // Set quiz title
             const title = `${currentQuiz.subject.charAt(0).toUpperCase() + currentQuiz.subject.slice(1)} - ${currentQuiz.format.charAt(0).toUpperCase() + currentQuiz.format.slice(1)} Format`;
             document.getElementById('quizTitle').textContent = title;
+            console.log('Quiz title set:', title);
             
+            // Get questions container
             const container = document.getElementById('questionsContainer');
+            if (!container) {
+                console.error('Questions container not found!');
+                return;
+            }
+            
             container.innerHTML = '';
+            console.log('Questions to display:', currentQuiz.questions);
+            
+            // Generate questions
+            if (!currentQuiz.questions || currentQuiz.questions.length === 0) {
+                console.error('No questions found in quiz data');
+                container.innerHTML = '<p style="color: white; text-align: center; padding: 20px;">No questions available for this quiz.</p>';
+                return;
+            }
             
             currentQuiz.questions.forEach((q, index) => {
+                console.log(`Creating question ${index + 1}:`, q);
+                
                 const questionDiv = document.createElement('div');
                 questionDiv.className = 'question';
                 questionDiv.innerHTML = `
@@ -674,7 +696,13 @@
                 container.appendChild(questionDiv);
             });
             
-            document.getElementById('submitButton').style.display = 'block';
+            // Show submit button
+            const submitBtn = document.getElementById('submitButton');
+            if (submitBtn) {
+                submitBtn.style.display = 'block';
+            }
+            
+            console.log('Quiz display completed');
         }
 
         function selectAnswer(questionIndex, optionIndex) {
