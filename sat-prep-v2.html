@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAT Prep Platform - Firestore Edition</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .auth-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .auth-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        .access-denied {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            border-left: 5px solid #ff6b6b;
+        }
+        
+        .auth-title {
+            font-size: 2.2em;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        
+        .google-signin-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #333;
+            font-weight: 600;
+            font-size: 1.1em;
+            width: 100%;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .google-signin-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-color: #667eea;
+        }
+        
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: none;
+        }
+        
+        .dashboard-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .student-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .student-details h2 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .logout-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .logout-btn:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+        }
+        
+        .quiz-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .quiz-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .quiz-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .quiz-title {
+            font-size: 1.4em;
+            color: #667eea;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .quiz-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 5px;
+            position: relative;
+        }
+        
+        .quiz-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .quiz-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .quiz-btn.loading::after {
+            content: "";
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border: 2px solid #ffffff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .progress-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .progress-title {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            font-weight: 700;
+        }
+        
+        .student-stats {
+            display: flex;
+            justify-content: space-around;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+            flex: 1;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        #quizContainer {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: none;
+        }
+        
+        .quiz-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+        
+        .question {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 10px;
+        }
+        
+        .question h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .options {
+            display: grid;
+            gap: 10px;
+        }
+        
+        .option {
+            padding: 12px 15px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .option:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+        
+        .option.selected {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+        
+        .loading-spinner {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 18px;
+        }
+        
+        .error-message {
+            background: #ffe6e6;
+            border: 1px solid #ff6b6b;
+            color: #cc0000;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .quiz-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .student-stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .student-info {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Authentication Screen -->
+    <div id="authScreen" class="auth-screen">
+        <div class="auth-container">
+            <h1 class="auth-title">🎯 SAT Prep Platform</h1>
+            <p style="color: #666; margin-bottom: 30px;">
+                Sign in with your authorized Gmail account to access your personalized SAT preparation dashboard.
+            </p>
+            
+            <button class="google-signin-btn" onclick="signInWithGoogle()">
+                <svg width="20" height="20" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Sign in with Google
+            </button>
+            
+            <p style="color: #666; font-size: 0.9em; margin-top: 20px;">
+                📧 Need access? Contact your instructor to be added to the approved student list.
+            </p>
+        </div>
+    </div>
+
+    <!-- Access Denied Screen -->
+    <div id="accessDeniedScreen" class="auth-screen" style="display: none;">
+        <div class="access-denied">
+            <h1 style="color: #ff6b6b; margin-bottom: 20px;">🚫 Access Denied</h1>
+            <h2 style="color: #333; margin-bottom: 20px;">Unauthorized Email Account</h2>
+            <p style="color: #666; margin-bottom: 20px; line-height: 1.6;">
+                Your email address <strong id="deniedEmail"></strong> is not authorized to access this SAT prep platform.
+            </p>
+            <p style="color: #666; margin-bottom: 30px; line-height: 1.6;">
+                <strong>To gain access:</strong><br>
+                📧 Contact your instructor or administrator<br>
+                📝 Provide your email address for approval<br>
+                ⏰ Wait for confirmation before trying again
+            </p>
+            <button class="logout-btn" onclick="signOut()">
+                Try Different Account
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="mainContainer" class="main-container">
+        <div class="dashboard-header">
+            <div class="student-info">
+                <div class="student-details">
+                    <h2 id="studentName">Welcome, Student!</h2>
+                    <p id="studentEmail" style="color: #666;"></p>
+                </div>
+                <button class="logout-btn" onclick="signOut()">Sign Out</button>
+            </div>
+        </div>
+
+        <div class="quiz-grid">
+            <div class="quiz-card">
+                <h3 class="quiz-title">📚 Reading Comprehension</h3>
+                <p style="color: #666; margin-bottom: 20px;">Test your reading skills with passages and critical analysis questions.</p>
+                <button class="quiz-btn" onclick="startQuiz('reading', 'traditional')" id="readingTraditional">Traditional Format</button>
+                <button class="quiz-btn" onclick="startQuiz('reading', 'jeopardy')" id="readingJeopardy">Jeopardy Style</button>
+                <div style="margin-top: 10px; font-size: 0.9em; color: #666;" id="readingCount">Loading questions...</div>
+            </div>
+
+            <div class="quiz-card">
+                <h3 class="quiz-title">🧮 Mathematics</h3>
+                <p style="color: #666; margin-bottom: 20px;">Practice algebra, geometry, and advanced math concepts.</p>
+                <button class="quiz-btn" onclick="startQuiz('math', 'traditional')" id="mathTraditional">Traditional Format</button>
+                <button class="quiz-btn" onclick="startQuiz('math', 'jeopardy')" id="mathJeopardy">Jeopardy Style</button>
+                <div style="margin-top: 10px; font-size: 0.9em; color: #666;" id="mathCount">Loading questions...</div>
+            </div>
+
+            <div class="quiz-card">
+                <h3 class="quiz-title">✍️ Writing & Language</h3>
+                <p style="color: #666; margin-bottom: 20px;">Improve grammar, style, and writing mechanics.</p>
+                <button class="quiz-btn" onclick="startQuiz('writing', 'traditional')" id="writingTraditional">Traditional Format</button>
+                <button class="quiz-btn" onclick="startQuiz('writing', 'jeopardy')" id="writingJeopardy">Jeopardy Style</button>
+                <div style="margin-top: 10px; font-size: 0.9em; color: #666;" id="writingCount">Loading questions...</div>
+            </div>
+        </div>
+
+        <div class="progress-section">
+            <h3 class="progress-title">📊 Your Progress</h3>
+            <div class="student-stats">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalQuizzes">0</div>
+                    <div class="stat-label">Quizzes Completed</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="averageScore">0%</div>
+                    <div class="stat-label">Average Score</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="bestScore">0%</div>
+                    <div class="stat-label">Best Score</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="currentStreak">0</div>
+                    <div class="stat-label">Current Streak</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quiz Container -->
+    <div id="quizContainer" class="quiz-container">
+        <button class="back-btn" onclick="showDashboard()">← Back to Dashboard</button>
+        <h2 id="quizTitle">Quiz Title</h2>
+        <div id="questionsContainer"></div>
+        <button class="submit-btn" onclick="submitQuiz()" style="display: none;" id="submitButton">Submit Quiz</button>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Firebase Configuration - Your Actual Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAv4Z5vAl8knY9RNs_U5VFObU3WKJGuxqg",
+            authDomain: "sat-education-platform.firebaseapp.com",
+            projectId: "sat-education-platform",
+            storageBucket: "sat-education-platform.firebasestorage.app",
+            messagingSenderId: "860946166755",
+            appId: "1:860946166755:web:58b4d314a3ecae88db26d6",
+            measurementId: "G-PHHSDVW875"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // 🔐 YOUR AUTHORIZED EMAILS - PRESERVED FROM YOUR PREVIOUS CHANGES
+        const authorizedEmails = [
+            'svenky3@gmail.com',        // Your email
+            'aneeshjax@gmail.com',      // Student 1
+            'ashwinjax@gmail.com',      // Student 2
+            'mythiliVenky@gmail.com',   // Student 3
+            // Add more authorized emails below
+        ];
+
+        let currentUser = null;
+        let currentQuiz = null;
+        let userAnswers = [];
+        let questionsCache = {}; // Cache questions to avoid repeated database calls
+
+        // Check if user is authorized
+        function isAuthorizedUser(email) {
+            return authorizedEmails.includes(email.toLowerCase());
+        }
+
+        // Load questions from Firestore
+        async function loadQuestions(subject, format) {
+            const cacheKey = `${subject}_${format}`;
+            
+            // Return cached questions if available
+            if (questionsCache[cacheKey]) {
+                console.log('Using cached questions for:', cacheKey);
+                return questionsCache[cacheKey];
+            }
+            
+            try {
+                console.log(`Loading questions from Firestore: ${subject} - ${format}`);
+                
+                const snapshot = await db.collection('quizQuestions')
+                    .where('subject', '==', subject)
+                    .where('format', '==', format)
+                    .where('isActive', '==', true)
+                    .get();
+                
+                const questions = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    question: doc.data().question,
+                    options: doc.data().options,
+                    correct: doc.data().correct,
+                    explanation: doc.data().explanation,
+                    tags: doc.data().tags
+                }));
+                
+                // Cache the questions
+                questionsCache[cacheKey] = questions;
+                
+                console.log(`Loaded ${questions.length} questions for ${subject} - ${format}`);
+                return questions;
+                
+            } catch (error) {
+                console.error('Error loading questions:', error);
+                throw new Error(`Failed to load ${subject} ${format} questions: ${error.message}`);
+            }
+        }
+
+        // Load question counts for dashboard
+        async function loadQuestionCounts() {
+            const subjects = ['reading', 'math', 'writing'];
+            const formats = ['traditional', 'jeopardy'];
+            
+            for (const subject of subjects) {
+                try {
+                    for (const format of formats) {
+                        const questions = await loadQuestions(subject, format);
+                        const buttonId = `${subject}${format.charAt(0).toUpperCase() + format.slice(1)}`;
+                        const button = document.getElementById(buttonId);
+                        if (button && questions.length === 0) {
+                            button.disabled = true;
+                            button.textContent = `${format.charAt(0).toUpperCase() + format.slice(1)} (No Questions)`;
+                        }
+                    }
+                    
+                    const totalQuestions = Object.keys(questionsCache)
+                        .filter(key => key.startsWith(subject))
+                        .reduce((sum, key) => sum + questionsCache[key].length, 0);
+                    
+                    const countElement = document.getElementById(`${subject}Count`);
+                    if (countElement) {
+                        countElement.textContent = `${totalQuestions} questions available`;
+                    }
+                    
+                } catch (error) {
+                    console.error(`Error loading ${subject} questions:`, error);
+                    const countElement = document.getElementById(`${subject}Count`);
+                    if (countElement) {
+                        countElement.textContent = 'Error loading questions';
+                        countElement.style.color = '#ff6b6b';
+                    }
+                }
+            }
+        }
+
+        // Authentication state observer
+        auth.onAuthStateChanged(async function(user) {
+            if (user) {
+                console.log('User signed in:', user.email);
+                
+                // Check if user is authorized
+                if (isAuthorizedUser(user.email)) {
+                    currentUser = user;
+                    showDashboard();
+                    await loadUserData();
+                    await loadQuestionCounts(); // Load question counts for dashboard
+                } else {
+                    console.log('Unauthorized user:', user.email);
+                    showAccessDenied(user.email);
+                }
+            } else {
+                console.log('User signed out');
+                currentUser = null;
+                showAuthScreen();
+            }
+        });
+
+        function showAuthScreen() {
+            document.getElementById('authScreen').style.display = 'flex';
+            document.getElementById('accessDeniedScreen').style.display = 'none';
+            document.getElementById('mainContainer').style.display = 'none';
+            document.getElementById('quizContainer').style.display = 'none';
+        }
+
+        function showAccessDenied(email) {
+            document.getElementById('deniedEmail').textContent = email;
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('accessDeniedScreen').style.display = 'flex';
+            document.getElementById('mainContainer').style.display = 'none';
+            document.getElementById('quizContainer').style.display = 'none';
+        }
+
+        function showDashboard() {
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('accessDeniedScreen').style.display = 'none';
+            document.getElementById('mainContainer').style.display = 'block';
+            document.getElementById('quizContainer').style.display = 'none';
+            
+            if (currentUser) {
+                document.getElementById('studentName').textContent = `Welcome, ${currentUser.displayName || 'Student'}!`;
+                document.getElementById('studentEmail').textContent = currentUser.email;
+            }
+        }
+
+        async function signInWithGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            try {
+                await auth.signInWithPopup(provider);
+            } catch (error) {
+                console.error('Error signing in:', error);
+                alert('Error signing in. Please try again.');
+            }
+        }
+
+        async function signOut() {
+            try {
+                await auth.signOut();
+            } catch (error) {
+                console.error('Error signing out:', error);
+            }
+        }
+
+        async function loadUserData() {
+            if (!currentUser) return;
+            
+            try {
+                const userDoc = await db.collection('students').doc(currentUser.uid).get();
+                
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    updateProgressDisplay(userData);
+                } else {
+                    // Create new user document
+                    await db.collection('students').doc(currentUser.uid).set({
+                        name: currentUser.displayName || 'Student',
+                        email: currentUser.email,
+                        joinDate: firebase.firestore.FieldValue.serverTimestamp(),
+                        totalQuizzes: 0,
+                        totalScore: 0,
+                        bestScore: 0,
+                        currentStreak: 0
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        function updateProgressDisplay(userData) {
+            document.getElementById('totalQuizzes').textContent = userData.totalQuizzes || 0;
+            document.getElementById('averageScore').textContent = userData.totalQuizzes > 0 ? 
+                Math.round((userData.totalScore || 0) / userData.totalQuizzes) + '%' : '0%';
+            document.getElementById('bestScore').textContent = (userData.bestScore || 0) + '%';
+            document.getElementById('currentStreak').textContent = userData.currentStreak || 0;
+        }
+
+        async function startQuiz(subject, format) {
+            console.log('Starting quiz:', subject, format);
+            
+            // Show loading state
+            const buttonId = `${subject}${format.charAt(0).toUpperCase() + format.slice(1)}`;
+            const button = document.getElementById(buttonId);
+            if (button) {
+                button.disabled = true;
+                button.classList.add('loading');
+                button.textContent = 'Loading...';
+            }
+            
+            try {
+                const questions = await loadQuestions(subject, format);
+                
+                if (!questions || questions.length === 0) {
+                    alert(`No ${subject} ${format} questions available yet. Please try another quiz or contact your instructor.`);
+                    return;
+                }
+                
+                currentQuiz = {
+                    subject,
+                    format,
+                    questions: questions.slice(0, 10), // Limit to 10 questions for now
+                    startTime: Date.now()
+                };
+                
+                userAnswers = new Array(currentQuiz.questions.length).fill(null);
+                displayQuiz();
+                
+            } catch (error) {
+                console.error('Error starting quiz:', error);
+                alert(`Error loading quiz: ${error.message}`);
+            } finally {
+                // Reset button state
+                if (button) {
+                    button.disabled = false;
+                    button.classList.remove('loading');
+                    button.textContent = format.charAt(0).toUpperCase() + format.slice(1) + ' Format';
+                }
+            }
+        }
+
+        function displayQuiz() {
+            console.log('Starting displayQuiz function');
+            console.log('Current quiz:', currentQuiz);
+            
+            // Hide dashboard and show quiz container
+            const mainContainer = document.getElementById('mainContainer');
+            const quizContainer = document.getElementById('quizContainer');
+            
+            if (mainContainer) {
+                mainContainer.style.display = 'none';
+                console.log('Hidden main container');
+            }
+            
+            if (quizContainer) {
+                quizContainer.style.display = 'block';
+                console.log('Showed quiz container');
+            } else {
+                console.error('Quiz container not found!');
+                return;
+            }
+            
+            // Set quiz title
+            const title = `${currentQuiz.subject.charAt(0).toUpperCase() + currentQuiz.subject.slice(1)} - ${currentQuiz.format.charAt(0).toUpperCase() + currentQuiz.format.slice(1)} Format`;
+            const titleElement = document.getElementById('quizTitle');
+            if (titleElement) {
+                titleElement.textContent = title;
+                console.log('Quiz title set:', title);
+            }
+            
+            // Get questions container
+            const container = document.getElementById('questionsContainer');
+            if (!container) {
+                console.error('Questions container not found!');
+                return;
+            }
+            
+            container.innerHTML = '';
+            console.log('Questions to display:', currentQuiz.questions);
+            
+            // Generate questions
+            if (!currentQuiz.questions || currentQuiz.questions.length === 0) {
+                console.error('No questions found in quiz data');
+                container.innerHTML = '<div class="error-message">No questions available for this quiz. Please try another quiz or contact your instructor.</div>';
+                return;
+            }
+            
+            currentQuiz.questions.forEach((q, index) => {
+                console.log(`Creating question ${index + 1}:`, q);
+                
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question';
+                questionDiv.innerHTML = `
+                    <h3>Question ${index + 1}:</h3>
+                    <p>${q.question}</p>
+                    <div class="options">
+                        ${q.options.map((option, optIndex) => `
+                            <div class="option" onclick="selectAnswer(${index}, ${optIndex})">
+                                ${option}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(questionDiv);
+            });
+            
+            // Show submit button
+            const submitBtn = document.getElementById('submitButton');
+            if (submitBtn) {
+                submitBtn.style.display = 'block';
+                console.log('Submit button shown');
+            }
+            
+            console.log('Quiz display completed');
+        }
+
+        function selectAnswer(questionIndex, optionIndex) {
+            userAnswers[questionIndex] = optionIndex;
+            
+            const questionDiv = document.querySelectorAll('.question')[questionIndex];
+            const options = questionDiv.querySelectorAll('.option');
+            options.forEach(opt => opt.classList.remove('selected'));
+            options[optionIndex].classList.add('selected');
+        }
+
+        async function submitQuiz() {
+            if (userAnswers.includes(null)) {
+                alert('Please answer all questions before submitting.');
+                return;
+            }
+            
+            let correct = 0;
+            let resultsHTML = '<div style="background: white; padding: 20px; border-radius: 10px; margin: 20px 0;"><h3 style="color: #667eea; margin-bottom: 15px;">Quiz Results:</h3>';
+            
+            currentQuiz.questions.forEach((q, index) => {
+                const isCorrect = userAnswers[index] === q.correct;
+                if (isCorrect) correct++;
+                
+                const userAnswerText = q.options[userAnswers[index]];
+                const correctAnswerText = q.options[q.correct];
+                
+                resultsHTML += `
+                    <div style="margin-bottom: 15px; padding: 10px; border-left: 4px solid ${isCorrect ? '#28a745' : '#dc3545'};">
+                        <strong>Question ${index + 1}:</strong> ${q.question}<br>
+                        <span style="color: ${isCorrect ? '#28a745' : '#dc3545'};">
+                            Your answer: ${userAnswerText} ${isCorrect ? '✅' : '❌'}
+                        </span><br>
+                        ${!isCorrect ? `<span style="color: #28a745;">Correct answer: ${correctAnswerText} ✅</span><br>` : ''}
+                        ${q.explanation ? `<span style="color: #666; font-style: italic;">Explanation: ${q.explanation}</span>` : ''}
+                    </div>
+                `;
+            });
+            
+            const score = Math.round((correct / currentQuiz.questions.length) * 100);
+            const timeSpent = Math.round((Date.now() - currentQuiz.startTime) / 1000);
+            
+            resultsHTML += `
+                <div style="text-align: center; margin-top: 20px; padding: 15px; background: rgba(102, 126, 234, 0.1); border-radius: 8px;">
+                    <h4 style="color: #667eea;">Final Score: ${score}% (${correct}/${currentQuiz.questions.length})</h4>
+                    <p style="color: #666;">Time spent: ${timeSpent} seconds</p>
+                </div>
+            </div>`;
+            
+            // Show results
+            document.getElementById('questionsContainer').innerHTML = resultsHTML;
+            document.getElementById('submitButton').style.display = 'none';
+            
+            // Add "Back to Dashboard" button
+            const backBtn = document.createElement('button');
+            backBtn.className = 'quiz-btn';
+            backBtn.textContent = 'Back to Dashboard';
+            backBtn.style.margin = '20px auto';
+            backBtn.style.display = 'block';
+            backBtn.onclick = showDashboard;
+            document.getElementById('questionsContainer').appendChild(backBtn);
+            
+            // Save quiz result
+            try {
+                await db.collection('quizResults').add({
+                    studentId: currentUser.uid,
+                    subject: currentQuiz.subject,
+                    format: currentQuiz.format,
+                    score: score,
+                    correct: correct,
+                    total: currentQuiz.questions.length,
+                    timeSpent: timeSpent,
+                    answers: userAnswers,
+                    completedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                // Update user stats
+                const userRef = db.collection('students').doc(currentUser.uid);
+                const userDoc = await userRef.get();
+                const userData = userDoc.data();
+                
+                const newTotalQuizzes = (userData.totalQuizzes || 0) + 1;
+                const newTotalScore = (userData.totalScore || 0) + score;
+                const newBestScore = Math.max(userData.bestScore || 0, score);
+                const newStreak = score >= 80 ? (userData.currentStreak || 0) + 1 : 0;
+                
+                await userRef.update({
+                    totalQuizzes: newTotalQuizzes,
+                    totalScore: newTotalScore,
+                    bestScore: newBestScore,
+                    currentStreak: newStreak,
+                    lastQuizDate: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                await loadUserData();
+                
+            } catch (error) {
+                console.error('Error saving quiz result:', error);
+                alert('Quiz completed but there was an error saving your result.');
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', function() {
+            showAuthScreen();
+        });
+    </script>
+</body>
+</html>
