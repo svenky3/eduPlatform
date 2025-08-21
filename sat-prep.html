@@ -482,6 +482,16 @@
                         question: "This author wrote 'To Kill a Mockingbird'",
                         options: ["Who is Harper Lee?", "Who is Mark Twain?", "Who is John Steinbeck?", "Who is Maya Angelou?"],
                         correct: 0
+                    },
+                    {
+                        question: "This Shakespeare play features the characters Romeo and Juliet",
+                        options: ["What is Hamlet?", "What is Romeo and Juliet?", "What is Macbeth?", "What is Othello?"],
+                        correct: 1
+                    },
+                    {
+                        question: "This punctuation mark ends a declarative sentence",
+                        options: ["What is a period?", "What is a comma?", "What is a semicolon?", "What is an exclamation mark?"],
+                        correct: 0
                     }
                 ]
             },
@@ -503,6 +513,16 @@
                         question: "This is the value of π rounded to two decimal places",
                         options: ["What is 3.14?", "What is 3.16?", "What is 3.12?", "What is 3.18?"],
                         correct: 0
+                    },
+                    {
+                        question: "This number is the square root of 144",
+                        options: ["What is 10?", "What is 12?", "What is 14?", "What is 16?"],
+                        correct: 1
+                    },
+                    {
+                        question: "This geometric shape has exactly three sides",
+                        options: ["What is a triangle?", "What is a square?", "What is a rectangle?", "What is a pentagon?"],
+                        correct: 0
                     }
                 ]
             },
@@ -517,6 +537,11 @@
                             "The students whom studied hard passed the test."
                         ],
                         correct: 1
+                    },
+                    {
+                        question: "What is the correct plural form of 'child'?",
+                        options: ["childs", "children", "childrens", "child's"],
+                        correct: 1
                     }
                 ],
                 jeopardy: [
@@ -524,6 +549,16 @@
                         question: "This punctuation mark is used to show possession",
                         options: ["What is an apostrophe?", "What is a comma?", "What is a semicolon?", "What is a colon?"],
                         correct: 0
+                    },
+                    {
+                        question: "This part of speech describes a noun",
+                        options: ["What is a verb?", "What is an adjective?", "What is an adverb?", "What is a preposition?"],
+                        correct: 1
+                    },
+                    {
+                        question: "This tense describes an action that happened in the past",
+                        options: ["What is present tense?", "What is past tense?", "What is future tense?", "What is perfect tense?"],
+                        correct: 1
                     }
                 ]
             }
@@ -745,14 +780,48 @@
             }
             
             let correct = 0;
+            let resultsHTML = '<div style="background: white; padding: 20px; border-radius: 10px; margin: 20px 0;"><h3 style="color: #667eea; margin-bottom: 15px;">Quiz Results:</h3>';
+            
             currentQuiz.questions.forEach((q, index) => {
-                if (userAnswers[index] === q.correct) {
-                    correct++;
-                }
+                const isCorrect = userAnswers[index] === q.correct;
+                if (isCorrect) correct++;
+                
+                const userAnswerText = q.options[userAnswers[index]];
+                const correctAnswerText = q.options[q.correct];
+                
+                resultsHTML += `
+                    <div style="margin-bottom: 15px; padding: 10px; border-left: 4px solid ${isCorrect ? '#28a745' : '#dc3545'};">
+                        <strong>Question ${index + 1}:</strong> ${q.question}<br>
+                        <span style="color: ${isCorrect ? '#28a745' : '#dc3545'};">
+                            Your answer: ${userAnswerText} ${isCorrect ? '✅' : '❌'}
+                        </span><br>
+                        ${!isCorrect ? `<span style="color: #28a745;">Correct answer: ${correctAnswerText} ✅</span>` : ''}
+                    </div>
+                `;
             });
             
             const score = Math.round((correct / currentQuiz.questions.length) * 100);
             const timeSpent = Math.round((Date.now() - currentQuiz.startTime) / 1000);
+            
+            resultsHTML += `
+                <div style="text-align: center; margin-top: 20px; padding: 15px; background: rgba(102, 126, 234, 0.1); border-radius: 8px;">
+                    <h4 style="color: #667eea;">Final Score: ${score}% (${correct}/${currentQuiz.questions.length})</h4>
+                    <p style="color: #666;">Time spent: ${timeSpent} seconds</p>
+                </div>
+            </div>`;
+            
+            // Show results
+            document.getElementById('questionsContainer').innerHTML = resultsHTML;
+            document.getElementById('submitButton').style.display = 'none';
+            
+            // Add "Back to Dashboard" button
+            const backBtn = document.createElement('button');
+            backBtn.className = 'quiz-btn';
+            backBtn.textContent = 'Back to Dashboard';
+            backBtn.style.margin = '20px auto';
+            backBtn.style.display = 'block';
+            backBtn.onclick = showDashboard;
+            document.getElementById('questionsContainer').appendChild(backBtn);
             
             // Save quiz result
             try {
@@ -786,8 +855,6 @@
                     lastQuizDate: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 
-                alert(`Quiz completed! You scored ${score}% (${correct}/${currentQuiz.questions.length})`);
-                showDashboard();
                 await loadUserData();
                 
             } catch (error) {
