@@ -212,15 +212,20 @@
             margin-top: 5px;
         }
 
+        #quizContainer {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: none;
+        }
+        
         .quiz-container {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border-radius: 15px;
             padding: 30px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            max-width: 1200px;
-            margin: 0 auto;
-            display: none;
+            width: 100%;
         }
         
         .question {
@@ -653,13 +658,29 @@
             console.log('Current quiz:', currentQuiz);
             
             // Hide dashboard and show quiz container
-            document.getElementById('mainContainer').style.display = 'none';
-            document.getElementById('quizContainer').style.display = 'block';
+            const mainContainer = document.getElementById('mainContainer');
+            const quizContainer = document.getElementById('quizContainer');
+            
+            if (mainContainer) {
+                mainContainer.style.display = 'none';
+                console.log('Hidden main container');
+            }
+            
+            if (quizContainer) {
+                quizContainer.style.display = 'block';
+                console.log('Showed quiz container');
+            } else {
+                console.error('Quiz container not found!');
+                return;
+            }
             
             // Set quiz title
             const title = `${currentQuiz.subject.charAt(0).toUpperCase() + currentQuiz.subject.slice(1)} - ${currentQuiz.format.charAt(0).toUpperCase() + currentQuiz.format.slice(1)} Format`;
-            document.getElementById('quizTitle').textContent = title;
-            console.log('Quiz title set:', title);
+            const titleElement = document.getElementById('quizTitle');
+            if (titleElement) {
+                titleElement.textContent = title;
+                console.log('Quiz title set:', title);
+            }
             
             // Get questions container
             const container = document.getElementById('questionsContainer');
@@ -674,7 +695,7 @@
             // Generate questions
             if (!currentQuiz.questions || currentQuiz.questions.length === 0) {
                 console.error('No questions found in quiz data');
-                container.innerHTML = '<p style="color: #333; text-align: center; padding: 20px;">No questions available for this quiz.</p>';
+                container.innerHTML = '<p style="color: #333; text-align: center; padding: 20px; font-size: 18px; background: white; border-radius: 10px;">No questions available for this quiz.</p>';
                 return;
             }
             
@@ -701,9 +722,11 @@
             const submitBtn = document.getElementById('submitButton');
             if (submitBtn) {
                 submitBtn.style.display = 'block';
+                console.log('Submit button shown');
             }
             
             console.log('Quiz display completed');
+            console.log('Quiz container display:', quizContainer.style.display);
         }
 
         function selectAnswer(questionIndex, optionIndex) {
