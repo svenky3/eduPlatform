@@ -218,6 +218,8 @@
             border-radius: 15px;
             padding: 30px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 1200px;
+            margin: 0 auto;
             display: none;
         }
         
@@ -413,13 +415,11 @@
     </div>
 
     <!-- Quiz Container -->
-    <div id="quizContainer" class="main-container">
-        <div class="quiz-container" id="quizContent">
-            <button class="back-btn" onclick="showDashboard()">← Back to Dashboard</button>
-            <h2 id="quizTitle">Quiz Title</h2>
-            <div id="questionsContainer"></div>
-            <button class="submit-btn" onclick="submitQuiz()" style="display: none;" id="submitButton">Submit Quiz</button>
-        </div>
+    <div id="quizContainer" class="quiz-container">
+        <button class="back-btn" onclick="showDashboard()">← Back to Dashboard</button>
+        <h2 id="quizTitle">Quiz Title</h2>
+        <div id="questionsContainer"></div>
+        <button class="submit-btn" onclick="submitQuiz()" style="display: none;" id="submitButton">Submit Quiz</button>
     </div>
 
     <!-- Firebase Scripts -->
@@ -444,12 +444,12 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // 🔐 AUTHORIZED EMAILS - ADD YOUR STUDENTS HERE
+        // 🔐 YOUR AUTHORIZED EMAILS - PRESERVED FROM YOUR PREVIOUS CHANGES
         const authorizedEmails = [
-            'svenky3@gmail.com',        // Replace with your email
-            'student1@school.edu',         // Add your students' emails here
-            'student2@gmail.com',          // Add more students as needed
-            'teacher@school.edu',          // Add teacher emails
+            'svenky3@gmail.com',        // Your email
+            'aneeshjax@gmail.com',      // Student 1
+            'ashwinjax@gmail.com',      // Student 2
+            'mythiliVenky@gmail.com',   // Student 3
             // Add more authorized emails below
         ];
 
@@ -630,6 +630,7 @@
         }
 
         function startQuiz(subject, format) {
+            console.log('Starting quiz:', subject, format);
             const quiz = quizData[subject][format];
             if (!quiz) {
                 alert('Quiz not available yet.');
@@ -673,7 +674,7 @@
             // Generate questions
             if (!currentQuiz.questions || currentQuiz.questions.length === 0) {
                 console.error('No questions found in quiz data');
-                container.innerHTML = '<p style="color: white; text-align: center; padding: 20px;">No questions available for this quiz.</p>';
+                container.innerHTML = '<p style="color: #333; text-align: center; padding: 20px;">No questions available for this quiz.</p>';
                 return;
             }
             
