@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Jeopardy Questions</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
+        }
+        .button:hover {
+            background: #5a67d8;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 6px;
+            background: #e6f3ff;
+            border: 1px solid #0066cc;
+        }
+        .success { background: #e6ffe6; border-color: #00cc00; color: #006600; }
+        .error { background: #ffe6e6; border-color: #cc0000; color: #cc0000; }
+        .question-preview {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 6px;
+            background: #f9f9f9;
+        }
+        .jeopardy-style {
+            background: #e6f3ff;
+            border-left: 4px solid #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Add Better Jeopardy Questions</h1>
+        <p>This tool will add more distinctive Jeopardy-style questions to make the format clearly different from Traditional.</p>
+        
+        <div class="status" id="status">
+            Ready to add Jeopardy questions...
+        </div>
+        
+        <button class="button" onclick="addJeopardyQuestions()">🎪 Add Jeopardy Questions</button>
+        <button class="button" onclick="previewJeopardyQuestions()">👀 Preview Jeopardy Questions</button>
+        <button class="button" onclick="testJeopardyLoad()">🧪 Test Jeopardy Loading</button>
+        
+        <div id="questionsPreview"></div>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAv4Z5vAl8knY9RNs_U5VFObU3WKJGuxqg",
+            authDomain: "sat-education-platform.firebaseapp.com",
+            projectId: "sat-education-platform",
+            storageBucket: "sat-education-platform.firebasestorage.app",
+            messagingSenderId: "860946166755",
+            appId: "1:860946166755:web:58b4d314a3ecae88db26d6",
+            measurementId: "G-PHHSDVW875"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        function updateStatus(message, type = 'info') {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+        }
+
+        async function addJeopardyQuestions() {
+            updateStatus('Adding distinctive Jeopardy questions...', 'info');
+            
+            const jeopardyQuestions = [
+                // Reading - Jeopardy (More Questions)
+                {
+                    subject: "reading",
+                    format: "jeopardy",
+                    difficulty: "easy",
+                    question: "This author wrote 'To Kill a Mockingbird'",
+                    options: ["Who is Harper Lee?", "Who is Mark Twain?", "Who is John Steinbeck?", "Who is Maya Angelou?"],
+                    correct: 0,
+                    explanation: "Harper Lee wrote this classic novel about racial injustice in the American South.",
+                    tags: ["authors", "classic literature"],
+                    isActive: true,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                },
+                {
+                    subject: "reading",
+                    format: "jeopardy",
+                    difficulty: "medium",
+                    question: "This Shakespeare tragedy features a Danish prince",
+                    options: ["What is Hamlet?", "What is Macbeth?", "What is Othello?", "What is King Lear?"],
+                    correct: 0,
+                    explanation: "Hamlet is Shakespeare's famous tragedy about the Prince of Denmark.",
+                    tags: ["Shakespeare", "plays", "tragedy"],
+                    isActive: true,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                },
+                {
+                    subject: "reading",
+                    format: "jeopardy",
+                    difficulty: "medium",
+                    question: "This American novel tells the story of Jay Gatsby",
+                    options: ["What is The Great Gatsby?", "What is The Catcher in the Rye?", "What is Of Mice and Men?", "What is The Grapes of Wrath?"],
+                    correct: 0,
+                    explanation: "The Great Gatsby by F. Scott Fitzgerald is set in the Jazz Age.",
+                    tags: ["American literature", "novels", "Fitzgerald"],
+                    isActive: true,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                },
+                {
+                    subject: "reading",
+                    format: "jeopardy",
+                    difficulty: "easy",
+                    question: "This type of writing tells a story with characters and plot",
+                    options: ["What is fiction?", "What is poetry?", "What is drama?", "What is biography?"],
+                    correct: 0,
+                    explanation: "Fiction is imaginative writing that tells stories with made-up characters and events.",
+                    tags: ["literary genres", "fiction"],
+                    isActive: true,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                },
+                
+                // Math - Jeopardy (More Questions)
+                {
+                    subject: "math",
+                    format: "jeopardy",
+                    difficulty: "easy",
+                    question: "This is the value of π rounded to two decimal places",
+                    options: ["What is 3.14?", "What is 3.16?", "What is 3.12?", "What is 3.18?"],
+                    correct: 0,
+                    explanation: "π (pi) is approximately 3.14159..., which rounds to 3.14",
+                    tags: ["constants", "pi", "rounding"],
+                    isActive: true,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                },
+                {
+                    subject: "math",
+                    format: "jeopardy",
+                    difficulty: "medium",
+                    question: "This number is the square root of 144",
+                    options: ["What is 12?", "What is 14?", "What is 10?", "What is 16?"],
+                    correct: 0,
+                    explanation: "√144 = 12 because 12 × 12 = 144",
+                    tags: ["square roots", "radicals"],
+                    isActive: true,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                },
+                {
+                    subject: "math",
+                    format: "jeopardy",
+                    difficulty: "easy",
+                    question: "This geometric shape has exactly three sides",
+                    options: ["What is a triangle?", "What is a square?", "What is a rectangle?", "What is a pentagon?"],
+                    correct: 0,
+                    explanation: "A triangle is a polygon with three sides and three angles.",
+                    tags: ["geometry", "shapes", "triangles"],
+                    isActive: true,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                },
+                {
+                    subject: "math",
+                    format: "jeopardy",
+                    difficulty: "medium",
+                    question: "This is the formula for the area of a circle",
+                    options: ["What is πr²?", "What is 2πr?", "What is πd?", "What is r²?"],
+                    correct: 0,
+                    explanation: "The area of a circle equals π times the radius squared.",
+                    tags: ["formulas", "circles", "area"],
+                    isActive: true,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                },
+                
+                // Writing - Jeopardy (More Questions)
+                {
+                    subject: "writing",
+                    format: "jeopardy",
+                    difficulty: "easy",
+                    question: "This punctuation mark is used to show possession",
+                    options: ["What is an apostrophe?", "What is a comma?", "What is a semicolon?", "What is a colon?"],
+                    correct: 0,
+                    explanation: "The apostrophe (') is used to show possession, as in 'John's book'.",
+                    tags: ["punctuation", "apostrophe", "possession"],
+                    isActive: true,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                },
+                {
+                    subject: "writing",
+                    format: "jeopardy",
+                    difficulty: "medium",
+                    question: "This part of speech describes or modifies a noun",
+                    options: ["What is an adjective?", "What is a verb?", "What is an adverb?", "What is a preposition?"],
+                    correct: 0,
+                    explanation: "Adjectives describe or give more information about nouns.",
+                    tags: ["parts of speech", "adjectives", "grammar"],
+                    isActive: true,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                },
+                {
+                    subject: "writing",
+                    format: "jeopardy",
+                    difficulty: "easy",
+                    question: "This tense describes actions happening right now",
+                    options: ["What is present tense?", "What is past tense?", "What is future tense?", "What is perfect tense?"],
+                    correct: 0,
+                    explanation: "Present tense verbs describe actions happening in the current moment.",
+                    tags: ["verb tenses", "present tense", "grammar"],
+                    isActive: true,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                },
+                {
+                    subject: "writing",
+                    format: "jeopardy",
+                    difficulty: "medium",
+                    question: "This type of sentence contains two independent clauses joined by a conjunction",
+                    options: ["What is a compound sentence?", "What is a simple sentence?", "What is a complex sentence?", "What is a fragment?"],
+                    correct: 0,
+                    explanation: "Compound sentences have two complete thoughts connected by words like 'and', 'but', or 'or'.",
+                    tags: ["sentence structure", "compound sentences", "grammar"],
+                    isActive: true,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                }
+            ];
+
+            try {
+                const batch = db.batch();
+                let count = 0;
+                
+                for (const question of jeopardyQuestions) {
+                    const docRef = db.collection('quizQuestions').doc();
+                    batch.set(docRef, question);
+                    count++;
+                }
+                
+                await batch.commit();
+                updateStatus(`✅ Successfully added ${count} distinctive Jeopardy questions!`, 'success');
+                
+            } catch (error) {
+                updateStatus(`❌ Error adding questions: ${error.message}`, 'error');
+                console.error('Error adding questions:', error);
+            }
+        }
+
+        async function previewJeopardyQuestions() {
+            updateStatus('Loading Jeopardy questions for preview...', 'info');
+            
+            try {
+                const snapshot = await db.collection('quizQuestions')
+                    .where('format', '==', 'jeopardy')
+                    .get();
+                
+                const questions = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                
+                const previewEl = document.getElementById('questionsPreview');
+                previewEl.innerHTML = '<h3>🎪 Jeopardy Questions Preview:</h3>';
+                
+                questions.forEach((q, index) => {
+                    const questionDiv = document.createElement('div');
+                    questionDiv.className = 'question-preview jeopardy-style';
+                    questionDiv.innerHTML = `
+                        <strong>${q.subject.toUpperCase()} - JEOPARDY</strong> (${q.difficulty})
+                        <br><strong>Clue:</strong> ${q.question}
+                        <br><strong>Responses:</strong> ${q.options.join(' | ')}
+                        <br><strong>Correct Response:</strong> ${q.options[q.correct]}
+                        <br><strong>Explanation:</strong> ${q.explanation || 'None'}
+                    `;
+                    previewEl.appendChild(questionDiv);
+                });
+                
+                updateStatus(`✅ Loaded ${questions.length} Jeopardy questions for preview!`, 'success');
+                
+            } catch (error) {
+                updateStatus(`❌ Error loading questions: ${error.message}`, 'error');
+                console.error('Error loading questions:', error);
+            }
+        }
+
+        async function testJeopardyLoad() {
+            updateStatus('Testing Jeopardy question loading...', 'info');
+            
+            try {
+                // Test loading reading jeopardy questions
+                const snapshot = await db.collection('quizQuestions')
+                    .where('subject', '==', 'reading')
+                    .where('format', '==', 'jeopardy')
+                    .where('isActive', '==', true)
+                    .get();
+                
+                const questions = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                
+                updateStatus(`✅ Successfully loaded ${questions.length} reading Jeopardy questions!`, 'success');
+                console.log('Loaded Jeopardy questions:', questions);
+                
+            } catch (error) {
+                updateStatus(`❌ Error loading questions: ${error.message}`, 'error');
+                console.error('Error loading questions:', error);
+            }
+        }
+    </script>
+</body>
+</html>
