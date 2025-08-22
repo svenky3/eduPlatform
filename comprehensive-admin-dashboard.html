@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAT Platform - Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .admin-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .admin-title {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .admin-nav {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        
+        .nav-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn.active {
+            background: #4c51bf;
+            box-shadow: 0 5px 15px rgba(76, 81, 191, 0.4);
+        }
+        
+        .admin-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+        
+        .admin-section.active {
+            display: block;
+        }
+        
+        .section-title {
+            color: #667eea;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .management-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .management-card {
+            background: rgba(248, 250, 252, 0.8);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .card-title {
+            color: #667eea;
+            font-size: 1.4em;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .form-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .action-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .action-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+        
+        .action-btn.danger {
+            background: #ff6b6b;
+        }
+        
+        .action-btn.danger:hover {
+            background: #ff5252;
+        }
+        
+        .action-btn.success {
+            background: #28a745;
+        }
+        
+        .action-btn.success:hover {
+            background: #218838;
+        }
+        
+        .list-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            background: white;
+        }
+        
+        .list-item:last-child {
+            border-bottom: none;
+        }
+        
+        .list-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+        
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .table th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 90%;
+        }
+        
+        .close-btn {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+        }
+        
+        .close-btn:hover {
+            color: #667eea;
+        }
+        
+        .question-form {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .option-input {
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+        }
+        
+        .correct-indicator {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #667eea;
+            border-radius: 50%;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+        
+        .correct-indicator.selected {
+            background: #667eea;
+        }
+        
+        @media (max-width: 768px) {
+            .management-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+            
+            .admin-nav {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1 class="admin-title">👩‍🏫 SAT Platform Admin</h1>
+            <p style="color: #666; font-size: 1.1em;">Comprehensive Management Dashboard</p>
+        </div>
+
+        <div class="admin-nav">
+            <button class="nav-btn active" onclick="showSection('overview')">📊 Overview</button>
+            <button class="nav-btn" onclick="showSection('students')">👥 Students</button>
+            <button class="nav-btn" onclick="showSection('questions')">📚 Questions</button>
+            <button class="nav-btn" onclick="showSection('performance')">📈 Performance</button>
+            <button class="nav-btn" onclick="showSection('exports')">📥 Reports</button>
+        </div>
+
+        <!-- Overview Section -->
+        <div id="overview" class="admin-section active">
+            <h2 class="section-title">📊 Platform Overview</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalStudentsCount">0</div>
+                    <div class="stat-label">Authorized Students</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalQuizzesCount">0</div>
+                    <div class="stat-label">Quizzes Completed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalQuestionsCount">0</div>
+                    <div class="stat-label">Questions Available</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="averagePlatformScore">0%</div>
+                    <div class="stat-label">Platform Average</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="activeToday">0</div>
+                    <div class="stat-label">Active Today</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="activeThisWeek">0</div>
+                    <div class="stat-label">Active This Week</div>
+                </div>
+            </div>
+
+            <div class="management-card">
+                <h3 class="card-title">📈 Recent Activity</h3>
+                <div id="recentActivityList">Loading recent activity...</div>
+            </div>
+        </div>
+
+        <!-- Students Section -->
+        <div id="students" class="admin-section">
+            <h2 class="section-title">👥 Student Management</h2>
+            
+            <div class="management-grid">
+                <div class="management-card">
+                    <h3 class="card-title">📧 Add New Student</h3>
+                    <div class="input-group">
+                        <input type="email" id="newStudentEmail" class="form-input" placeholder="student@email.com" />
+                        <button class="action-btn" onclick="addStudent()">Add Student</button>
+                    </div>
+                    <div class="input-group">
+                        <textarea id="bulkEmails" class="form-input" rows="4" placeholder="Add multiple emails (one per line)&#10;student1@email.com&#10;student2@email.com"></textarea>
+                        <button class="action-btn" onclick="addBulkStudents()">Add Bulk</button>
+                    </div>
+                </div>
+
+                <div class="management-card">
+                    <h3 class="card-title">🗑️ Quick Actions</h3>
+                    <button class="action-btn success" onclick="exportStudentList()" style="width: 100%; margin-bottom: 10px;">
+                        📥 Export Student List
+                    </button>
+                    <button class="action-btn danger" onclick="removeInactiveStudents()" style="width: 100%;">
+                        🗑️ Remove Inactive (30+ days)
+                    </button>
+                </div>
+            </div>
+
+            <div class="management-card">
+                <h3 class="card-title">📋 Authorized Students</h3>
+                <div id="studentsList" class="list-container">Loading students...</div>
+            </div>
+        </div>
+
+        <!-- Questions Section -->
+        <div id="questions" class="admin-section">
+            <h2 class="section-title">📚 Question Management</h2>
+            
+            <div class="management-grid">
+                <div class="management-card">
+                    <h3 class="card-title">➕ Add New Question</h3>
+                    <button class="action-btn" onclick="openQuestionModal()" style="width: 100%; margin-bottom: 15px;">
+                        📝 Create New Question
+                    </button>
+                    <button class="action-btn success" onclick="importQuestions()" style="width: 100%;">
+                        📤 Import Questions (CSV)
+                    </button>
+                </div>
+
+                <div class="management-card">
+                    <h3 class="card-title">📊 Question Statistics</h3>
+                    <div id="questionStats">
+                        <div style="margin-bottom: 10px;"><strong>Reading:</strong> <span id="readingCount">0</span> questions</div>
+                        <div style="margin-bottom: 10px;"><strong>Math:</strong> <span id="mathCount">0</span> questions</div>
+                        <div style="margin-bottom: 10px;"><strong>Writing:</strong> <span id="writingCount">0</span> questions</div>
+                        <hr style="margin: 15px 0;">
+                        <div style="margin-bottom: 10px;"><strong>Traditional:</strong> <span id="traditionalCount">0</span> questions</div>
+                        <div><strong>Jeopardy:</strong> <span id="jeopardyCount">0</span> questions</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="management-card">
+                <h3 class="card-title">📋 All Questions</h3>
+                <div style="margin-bottom: 15px;">
+                    <select id="subjectFilter" class="form-input" style="width: 200px; margin-right: 10px;">
+                        <option value="">All Subjects</option>
+                        <option value="reading">Reading</option>
+                        <option value="math">Math</option>
+                        <option value="writing">Writing</option>
+                    </select>
+                    <select id="formatFilter" class="form-input" style="width: 200px; margin-right: 10px;">
+                        <option value="">All Formats</option>
+                        <option value="traditional">Traditional</option>
+                        <option value="jeopardy">Jeopardy</option>
+                    </select>
+                    <button class="action-btn" onclick="filterQuestions()">Filter</button>
+                </div>
+                <div id="questionsList" style="max-height: 400px; overflow-y: auto;">Loading questions...</div>
+            </div>
+        </div>
+
+        <!-- Performance Section -->
+        <div id="performance" class="admin-section">
+            <h2 class="section-title">📈 Student Performance</h2>
+            
+            <div class="management-card">
+                <h3 class="card-title">🎯 Performance Summary</h3>
+                <table class="table" id="performanceTable">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Total Quizzes</th>
+                            <th>Average Score</th>
+                            <th>Best Score</th>
+                            <th>Current Streak</th>
+                            <th>Last Active</th>
+                        </tr>
+                    </thead>
+                    <tbody id="performanceTableBody">
+                        <tr><td colspan="6">Loading performance data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="management-card">
+                <h3 class="card-title">📊 Quiz Results</h3>
+                <div style="margin-bottom: 15px;">
+                    <select id="studentFilter" class="form-input" style="width: 250px; margin-right: 10px;">
+                        <option value="">All Students</option>
+                    </select>
+                    <button class="action-btn" onclick="filterResults()">Filter Results</button>
+                </div>
+                <div id="quizResultsList" style="max-height: 400px; overflow-y: auto;">Loading quiz results...</div>
+            </div>
+        </div>
+
+        <!-- Reports Section -->
+        <div id="exports" class="admin-section">
+            <h2 class="section-title">📥 Reports & Exports</h2>
+            
+            <div class="management-grid">
+                <div class="management-card">
+                    <h3 class="card-title">📊 Student Reports</h3>
+                    <button class="action-btn success" onclick="exportStudentProgress()" style="width: 100%; margin-bottom: 15px;">
+                        📈 Student Progress Report
+                    </button>
+                    <button class="action-btn success" onclick="exportAllScores()" style="width: 100%; margin-bottom: 15px;">
+                        🎯 All Quiz Scores
+                    </button>
+                    <button class="action-btn success" onclick="exportStudentList()" style="width: 100%;">
+                        👥 Authorized Students List
+                    </button>
+                </div>
+
+                <div class="management-card">
+                    <h3 class="card-title">📚 Question Reports</h3>
+                    <button class="action-btn success" onclick="exportAllQuestions()" style="width: 100%; margin-bottom: 15px;">
+                        📝 All Questions Database
+                    </button>
+                    <button class="action-btn success" onclick="exportQuestionStats()" style="width: 100%; margin-bottom: 15px;">
+                        📊 Question Statistics
+                    </button>
+                    <button class="action-btn success" onclick="generateBackup()" style="width: 100%;">
+                        💾 Complete Platform Backup
+                    </button>
+                </div>
+            </div>
+
+            <div class="management-card">
+                <h3 class="card-title">📅 Custom Reports</h3>
+                <div style="margin-bottom: 15px;">
+                    <label>Date Range:</label><br>
+                    <input type="date" id="startDate" class="form-input" style="width: 200px; margin: 5px 10px 5px 0;">
+                    <input type="date" id="endDate" class="form-input" style="width: 200px; margin: 5px 0;">
+                </div>
+                <button class="action-btn" onclick="generateCustomReport()" style="width: 100%;">
+                    📋 Generate Custom Report
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Question Modal -->
+    <div id="questionModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeQuestionModal()">&times;</span>
+            <h2>📝 Add New Question</h2>
+            <form class="question-form" onsubmit="saveQuestion(event)">
+                <div>
+                    <label>Subject:</label>
+                    <select id="questionSubject" class="form-input" required>
+                        <option value="reading">Reading</option>
+                        <option value="math">Math</option>
+                        <option value="writing">Writing</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Format:</label>
+                    <select id="questionFormat" class="form-input" required>
+                        <option value="traditional">Traditional</option>
+                        <option value="jeopardy">Jeopardy</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Difficulty:</label>
+                    <select id="questionDifficulty" class="form-input" required>
+                        <option value="easy">Easy</option>
+                        <option value="medium">Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Question:</label>
+                    <textarea id="questionText" class="form-input" rows="3" required></textarea>
+                </div>
+                <div>
+                    <label>Options:</label>
+                    <input type="text" id="option1" class="option-input" placeholder="Option A" required>
+                    <span class="correct-indicator" onclick="selectCorrect(0)"></span>
+                    <input type="text" id="option2" class="option-input" placeholder="Option B" required>
+                    <span class="correct-indicator" onclick="selectCorrect(1)"></span>
+                    <input type="text" id="option3" class="option-input" placeholder="Option C" required>
+                    <span class="correct-indicator" onclick="selectCorrect(2)"></span>
+                    <input type="text" id="option4" class="option-input" placeholder="Option D" required>
+                    <span class="correct-indicator" onclick="selectCorrect(3)"></span>
+                </div>
+                <div>
+                    <label>Explanation (optional):</label>
+                    <textarea id="questionExplanation" class="form-input" rows="2"></textarea>
+                </div>
+                <div>
+                    <label>Tags (comma-separated):</label>
+                    <input type="text" id="questionTags" class="form-input" placeholder="algebra, equations, solving">
+                </div>
+                <button type="submit" class="action-btn" style="width: 100%; margin-top: 15px;">Save Question</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAv4Z5vAl8knY9RNs_U5VFObU3WKJGuxqg",
+            authDomain: "sat-education-platform.firebaseapp.com",
+            projectId: "sat-education-platform",
+            storageBucket: "sat-education-platform.firebasestorage.app",
+            messagingSenderId: "860946166755",
+            appId: "1:860946166755:web:58b4d314a3ecae88db26d6",
+            measurementId: "G-PHHSDVW875"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Authorized emails management (this mirrors your platform)
+        let authorizedEmails = [
+            'svenky3@gmail.com',
+            'aneeshjax@gmail.com',
+            'ashwinjax@gmail.com',
+            'mythiliVenky@gmail.com'
+        ];
+
+        let selectedCorrectAnswer = 0;
+
+        // Navigation
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.admin-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active class from all nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName).classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+            
+            // Load section data
+            loadSectionData(sectionName);
+        }
+
+        async function loadSectionData(section) {
+            switch(section) {
+                case 'overview':
+                    await loadOverviewData();
+                    break;
+                case 'students':
+                    await loadStudentsData();
+                    break;
+                case 'questions':
+                    await loadQuestionsData();
+                    break;
+                case 'performance':
+                    await loadPerformanceData();
+                    break;
+                case 'exports':
+                    setupExportsSection();
+                    break;
+            }
+        }
+
+        // Overview Section
+        async function loadOverviewData() {
+            try {
+                // Load basic stats
+                const studentsCount = authorizedEmails.length;
+                document.getElementById('totalStudentsCount').textContent = studentsCount;
+
+                // Load quiz stats
+                const quizSnapshot = await db.collection('quizResults').get();
+                const totalQuizzes = quizSnapshot.size;
+                document.getElementById('totalQuizzesCount').textContent = totalQuizzes;
+
+                // Load questions stats
+                const questionsSnapshot = await db.collection('quizQuestions').get();
+                const totalQuestions = questionsSnapshot.size;
+                document.getElementById('totalQuestionsCount').textContent = totalQuestions;
+
+                // Calculate average score
+                let totalScore = 0;
+                let activeToday = 0;
+                let activeThisWeek = 0;
+                const today = new Date();
+                const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+                today.setHours(0, 0, 0, 0);
+
+                quizSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    totalScore += data.score || 0;
+                    
+                    if (data.completedAt) {
+                        const completedDate = data.completedAt.toDate();
+                        if (completedDate >= today) activeToday++;
+                        if (completedDate >= weekAgo) activeThisWeek++;
+                    }
+                });
+
+                const avgScore = totalQuizzes > 0 ? Math.round(totalScore / totalQuizzes) : 0;
+                document.getElementById('averagePlatformScore').textContent = avgScore + '%';
+                document.getElementById('activeToday').textContent = activeToday;
+                document.getElementById('activeThisWeek').textContent = activeThisWeek;
+
+                // Load recent activity
+                await loadRecentActivity();
+
+            } catch (error) {
+                console.error('Error loading overview data:', error);
+            }
+        }
+
+        async function loadRecentActivity() {
+            try {
+                const recentQuizzes = await db.collection('quizResults')
+                    .orderBy('completedAt', 'desc')
+                    .limit(10)
+                    .get();
+
+                const activityList = document.getElementById('recentActivityList');
+                activityList.innerHTML = '';
+
+                if (recentQuizzes.empty) {
+                    activityList.innerHTML = '<p>No recent activity</p>';
+                    return;
+                }
+
+                for (const doc of recentQuizzes.docs) {
+                    const quizData = doc.data();
+                    
+                    // Get student name
+                    let studentName = 'Unknown Student';
+                    try {
+                        const studentDoc = await db.collection('students').doc(quizData.studentId).get();
+                        if (studentDoc.exists) {
+                            studentName = studentDoc.data().name || studentDoc.data().email || 'Student';
+                        }
+                    } catch (error) {
+                        console.log('Could not fetch student name');
+                    }
+
+                    const activityDiv = document.createElement('div');
+                    activityDiv.className = 'list-item';
+                    const timeAgo = quizData.completedAt ? timeAgoString(quizData.completedAt.toDate()) : 'Unknown time';
+                    
+                    activityDiv.innerHTML = `
+                        <div>
+                            <strong>${studentName}</strong> completed ${quizData.subject} quiz (${quizData.format})
+                            <br><small style="color: #666;">${timeAgo}</small>
+                        </div>
+                        <div class="status-badge ${quizData.score >= 80 ? 'status-active' : 'status-inactive'}">
+                            ${quizData.score}%
+                        </div>
+                    `;
+                    activityList.appendChild(activityDiv);
+                }
+
+            } catch (error) {
+                console.error('Error loading recent activity:', error);
+                document.getElementById('recentActivityList').innerHTML = '<p>Error loading recent activity</p>';
+            }
+        }
+
+        function timeAgoString(date) {
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins} minutes ago`;
+            if (diffHours < 24) return `${diffHours} hours ago`;
+            return `${diffDays} days ago`;
+        }
+
+        // Students Section
+        async function loadStudentsData() {
+            const studentsList = document.getElementById('studentsList');
+            studentsList.innerHTML = '';
+
+            for (const email of authorizedEmails) {
+                const studentDiv = document.createElement('div');
+                studentDiv.className = 'list-item';
+                
+                // Try to get additional student info
+                let additionalInfo = '';
+                try {
+                    const studentQuery = await db.collection('students').where('email', '==', email).get();
+                    if (!studentQuery.empty) {
+                        const studentData = studentQuery.docs[0].data();
+                        const totalQuizzes = studentData.totalQuizzes || 0;
+                        const avgScore = studentData.totalQuizzes > 0 ? Math.round((studentData.totalScore || 0) / studentData.totalQuizzes) : 0;
+                        additionalInfo = `<br><small style="color: #666;">${totalQuizzes} quizzes, ${avgScore}% avg</small>`;
+                    }
+                } catch (error) {
+                    console.log('Could not load student stats for', email);
+                }
+
+                studentDiv.innerHTML = `
+                    <div>
+                        <strong>${email}</strong>
+                        ${additionalInfo}
+                    </div>
+                    <button class="action-btn danger" onclick="removeStudent('${email}')">Remove</button>
+                `;
+                studentsList.appendChild(studentDiv);
+            }
+        }
+
+        function addStudent() {
+            const emailInput = document.getElementById('newStudentEmail');
+            const email = emailInput.value.trim().toLowerCase();
+            
+            if (!email) {
+                alert('Please enter an email address.');
+                return;
+            }
+            
+            if (!email.includes('@')) {
+                alert('Please enter a valid email address.');
+                return;
+            }
+            
+            if (authorizedEmails.includes(email)) {
+                alert('This email is already authorized.');
+                return;
+            }
+            
+            authorizedEmails.push(email);
+            emailInput.value = '';
+            loadStudentsData();
+            
+            alert(`Added ${email} to authorized list.\n\nIMPORTANT: Update the authorizedEmails array in your sat-prep-v2.html file with the new list.`);
+            console.log('Updated authorized emails:', authorizedEmails);
+        }
+
+        function addBulkStudents() {
+            const bulkTextarea = document.getElementById('bulkEmails');
+            const emails = bulkTextarea.value.split('\n')
+                .map(email => email.trim().toLowerCase())
+                .filter(email => email && email.includes('@'));
+            
+            if (emails.length === 0) {
+                alert('Please enter valid email addresses (one per line).');
+                return;
+            }
+            
+            let addedCount = 0;
+            emails.forEach(email => {
+                if (!authorizedEmails.includes(email)) {
+                    authorizedEmails.push(email);
+                    addedCount++;
+                }
+            });
+            
+            bulkTextarea.value = '';
+            loadStudentsData();
+            
+            alert(`Added ${addedCount} new emails to authorized list.\n\nIMPORTANT: Update the authorizedEmails array in your sat-prep-v2.html file.`);
+            console.log('Updated authorized emails:', authorizedEmails);
+        }
+
+        function removeStudent(email) {
+            if (confirm(`Remove ${email} from authorized list?`)) {
+                authorizedEmails = authorizedEmails.filter(e => e !== email);
+                loadStudentsData();
+                alert(`Removed ${email}.\n\nIMPORTANT: Update the authorizedEmails array in your sat-prep-v2.html file.`);
+                console.log('Updated authorized emails:', authorizedEmails);
+            }
+        }
+
+        // Questions Section
+        async function loadQuestionsData() {
+            try {
+                // Load question statistics
+                const questionsSnapshot = await db.collection('quizQuestions').get();
+                const questions = questionsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                // Count by subject
+                const readingCount = questions.filter(q => q.subject === 'reading').length;
+                const mathCount = questions.filter(q => q.subject === 'math').length;
+                const writingCount = questions.filter(q => q.subject === 'writing').length;
+
+                // Count by format
+                const traditionalCount = questions.filter(q => q.format === 'traditional').length;
+                const jeopardyCount = questions.filter(q => q.format === 'jeopardy').length;
+
+                document.getElementById('readingCount').textContent = readingCount;
+                document.getElementById('mathCount').textContent = mathCount;
+                document.getElementById('writingCount').textContent = writingCount;
+                document.getElementById('traditionalCount').textContent = traditionalCount;
+                document.getElementById('jeopardyCount').textContent = jeopardyCount;
+
+                // Display all questions
+                displayQuestions(questions);
+
+            } catch (error) {
+                console.error('Error loading questions data:', error);
+            }
+        }
+
+        function displayQuestions(questions) {
+            const questionsList = document.getElementById('questionsList');
+            questionsList.innerHTML = '';
+
+            questions.forEach(question => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'list-item';
+                questionDiv.innerHTML = `
+                    <div>
+                        <strong>${question.subject.toUpperCase()} - ${question.format}</strong> (${question.difficulty})
+                        <br>${question.question}
+                        <br><small style="color: #666;">Correct: ${question.options[question.correct]}</small>
+                    </div>
+                    <div>
+                        <span class="status-badge ${question.isActive ? 'status-active' : 'status-inactive'}">
+                            ${question.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                        <button class="action-btn danger" onclick="deleteQuestion('${question.id}')" style="margin-left: 10px;">Delete</button>
+                    </div>
+                `;
+                questionsList.appendChild(questionDiv);
+            });
+        }
+
+        function filterQuestions() {
+            const subjectFilter = document.getElementById('subjectFilter').value;
+            const formatFilter = document.getElementById('formatFilter').value;
+            
+            // This would filter the displayed questions - implementation depends on current questions data
+            loadQuestionsData(); // For now, just reload all questions
+        }
+
+        function openQuestionModal() {
+            document.getElementById('questionModal').style.display = 'block';
+        }
+
+        function closeQuestionModal() {
+            document.getElementById('questionModal').style.display = 'none';
+            document.querySelector('.question-form').reset();
+            selectedCorrectAnswer = 0;
+            updateCorrectIndicators();
+        }
+
+        function selectCorrect(index) {
+            selectedCorrectAnswer = index;
+            updateCorrectIndicators();
+        }
+
+        function updateCorrectIndicators() {
+            document.querySelectorAll('.correct-indicator').forEach((indicator, index) => {
+                indicator.classList.toggle('selected', index === selectedCorrectAnswer);
+            });
+        }
+
+        async function saveQuestion(event) {
+            event.preventDefault();
+            
+            const questionData = {
+                subject: document.getElementById('questionSubject').value,
+                format: document.getElementById('questionFormat').value,
+                difficulty: document.getElementById('questionDifficulty').value,
+                question: document.getElementById('questionText').value,
+                options: [
+                    document.getElementById('option1').value,
+                    document.getElementById('option2').value,
+                    document.getElementById('option3').value,
+                    document.getElementById('option4').value
+                ],
+                correct: selectedCorrectAnswer,
+                explanation: document.getElementById('questionExplanation').value,
+                tags: document.getElementById('questionTags').value.split(',').map(tag => tag.trim()).filter(tag => tag),
+                isActive: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            try {
+                await db.collection('quizQuestions').add(questionData);
+                alert('Question added successfully!');
+                closeQuestionModal();
+                loadQuestionsData();
+            } catch (error) {
+                console.error('Error saving question:', error);
+                alert('Error saving question: ' + error.message);
+            }
+        }
+
+        async function deleteQuestion(questionId) {
+            if (confirm('Are you sure you want to delete this question?')) {
+                try {
+                    await db.collection('quizQuestions').doc(questionId).delete();
+                    alert('Question deleted successfully!');
+                    loadQuestionsData();
+                } catch (error) {
+                    console.error('Error deleting question:', error);
+                    alert('Error deleting question: ' + error.message);
+                }
+            }
+        }
+
+        // Performance Section
+        async function loadPerformanceData() {
+            try {
+                // Load student performance data
+                const studentsSnapshot = await db.collection('students').get();
+                const performanceTableBody = document.getElementById('performanceTableBody');
+                performanceTableBody.innerHTML = '';
+
+                if (studentsSnapshot.empty) {
+                    performanceTableBody.innerHTML = '<tr><td colspan="6">No student data available</td></tr>';
+                    return;
+                }
+
+                studentsSnapshot.forEach(doc => {
+                    const studentData = doc.data();
+                    const avgScore = studentData.totalQuizzes > 0 ? Math.round((studentData.totalScore || 0) / studentData.totalQuizzes) : 0;
+                    const lastActive = studentData.lastQuizDate ? timeAgoString(studentData.lastQuizDate.toDate()) : 'Never';
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${studentData.name || studentData.email || 'Unknown'}</td>
+                        <td>${studentData.totalQuizzes || 0}</td>
+                        <td>${avgScore}%</td>
+                        <td>${studentData.bestScore || 0}%</td>
+                        <td>${studentData.currentStreak || 0}</td>
+                        <td>${lastActive}</td>
+                    `;
+                    performanceTableBody.appendChild(row);
+                });
+
+                // Load student filter options
+                const studentFilter = document.getElementById('studentFilter');
+                studentFilter.innerHTML = '<option value="">All Students</option>';
+                studentsSnapshot.forEach(doc => {
+                    const studentData = doc.data();
+                    const option = document.createElement('option');
+                    option.value = doc.id;
+                    option.textContent = studentData.name || studentData.email || 'Unknown';
+                    studentFilter.appendChild(option);
+                });
+
+                // Load quiz results
+                await loadQuizResults();
+
+            } catch (error) {
+                console.error('Error loading performance data:', error);
+            }
+        }
+
+        async function loadQuizResults() {
+            try {
+                const quizResultsSnapshot = await db.collection('quizResults')
+                    .orderBy('completedAt', 'desc')
+                    .limit(50)
+                    .get();
+
+                const quizResultsList = document.getElementById('quizResultsList');
+                quizResultsList.innerHTML = '';
+
+                if (quizResultsSnapshot.empty) {
+                    quizResultsList.innerHTML = '<p>No quiz results available</p>';
+                    return;
+                }
+
+                for (const doc of quizResultsSnapshot.docs) {
+                    const quizData = doc.data();
+                    
+                    // Get student name
+                    let studentName = 'Unknown Student';
+                    try {
+                        const studentDoc = await db.collection('students').doc(quizData.studentId).get();
+                        if (studentDoc.exists) {
+                            studentName = studentDoc.data().name || studentDoc.data().email || 'Student';
+                        }
+                    } catch (error) {
+                        console.log('Could not fetch student name');
+                    }
+
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = 'list-item';
+                    const timeAgo = quizData.completedAt ? timeAgoString(quizData.completedAt.toDate()) : 'Unknown time';
+                    
+                    resultDiv.innerHTML = `
+                        <div>
+                            <strong>${studentName}</strong> - ${quizData.subject.toUpperCase()} (${quizData.format})
+                            <br><small style="color: #666;">${timeAgo} • ${quizData.correct}/${quizData.total} correct • ${quizData.timeSpent}s</small>
+                        </div>
+                        <div class="status-badge ${quizData.score >= 80 ? 'status-active' : 'status-inactive'}">
+                            ${quizData.score}%
+                        </div>
+                    `;
+                    quizResultsList.appendChild(resultDiv);
+                }
+
+            } catch (error) {
+                console.error('Error loading quiz results:', error);
+            }
+        }
+
+        // Export Functions
+        function exportStudentList() {
+            const csvContent = "Student Email\n" + authorizedEmails.join('\n');
+            downloadCSV(csvContent, 'authorized_students.csv');
+        }
+
+        async function exportAllScores() {
+            try {
+                const quizSnapshot = await db.collection('quizResults').get();
+                let csvContent = "Student ID,Subject,Format,Score,Correct,Total,Time Spent,Date\n";
+                
+                quizSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    const date = data.completedAt ? data.completedAt.toDate().toLocaleDateString() : 'Unknown';
+                    csvContent += `"${data.studentId}","${data.subject}","${data.format}",${data.score},${data.correct},${data.total},${data.timeSpent},"${date}"\n`;
+                });
+                
+                downloadCSV(csvContent, 'all_quiz_scores.csv');
+            } catch (error) {
+                alert('Error exporting scores: ' + error.message);
+            }
+        }
+
+        async function exportStudentProgress() {
+            try {
+                const studentsSnapshot = await db.collection('students').get();
+                let csvContent = "Name,Email,Total Quizzes,Total Score,Average Score,Best Score,Current Streak,Join Date,Last Quiz Date\n";
+                
+                studentsSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    const joinDate = data.joinDate ? data.joinDate.toDate().toLocaleDateString() : 'Unknown';
+                    const lastQuizDate = data.lastQuizDate ? data.lastQuizDate.toDate().toLocaleDateString() : 'Never';
+                    const avgScore = data.totalQuizzes > 0 ? Math.round((data.totalScore || 0) / data.totalQuizzes) : 0;
+                    csvContent += `"${data.name || ''}","${data.email}",${data.totalQuizzes || 0},${data.totalScore || 0},${avgScore},${data.bestScore || 0},${data.currentStreak || 0},"${joinDate}","${lastQuizDate}"\n`;
+                });
+                
+                downloadCSV(csvContent, 'student_progress_report.csv');
+            } catch (error) {
+                alert('Error exporting progress: ' + error.message);
+            }
+        }
+
+        async function exportAllQuestions() {
+            try {
+                const questionsSnapshot = await db.collection('quizQuestions').get();
+                let csvContent = "Subject,Format,Difficulty,Question,Option A,Option B,Option C,Option D,Correct Answer,Explanation,Tags,Active\n";
+                
+                questionsSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    const tags = data.tags ? data.tags.join('; ') : '';
+                    csvContent += `"${data.subject}","${data.format}","${data.difficulty}","${data.question}","${data.options[0]}","${data.options[1]}","${data.options[2]}","${data.options[3]}","${data.options[data.correct]}","${data.explanation || ''}","${tags}",${data.isActive}\n`;
+                });
+                
+                downloadCSV(csvContent, 'all_questions_database.csv');
+            } catch (error) {
+                alert('Error exporting questions: ' + error.message);
+            }
+        }
+
+        function downloadCSV(csvContent, filename) {
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+
+        function setupExportsSection() {
+            // Set default dates
+            const today = new Date();
+            const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+            
+            document.getElementById('startDate').value = weekAgo.toISOString().split('T')[0];
+            document.getElementById('endDate').value = today.toISOString().split('T')[0];
+        }
+
+        function generateCustomReport() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            if (!startDate || !endDate) {
+                alert('Please select both start and end dates.');
+                return;
+            }
+            
+            alert(`Custom report generation for ${startDate} to ${endDate} - Feature coming soon!`);
+        }
+
+        // Initialize dashboard
+        window.addEventListener('load', function() {
+            loadOverviewData();
+            updateCorrectIndicators();
+        });
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('questionModal');
+            if (event.target === modal) {
+                closeQuestionModal();
+            }
+        };
+    </script>
+</body>
+</html>
