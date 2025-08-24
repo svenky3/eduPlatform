@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAT Platform - Question Counter</title>
+    <title>SAT Platform - Question Counter & Fixer</title>
     <style>
         * {
             margin: 0;
@@ -26,7 +26,7 @@
             border-radius: 20px;
             padding: 40px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.1);
-            max-width: 600px;
+            max-width: 800px;
             width: 100%;
         }
 
@@ -63,6 +63,11 @@
             font-weight: bold;
         }
 
+        .warning {
+            color: #ffc107;
+            font-weight: bold;
+        }
+
         .error {
             color: #dc3545;
             font-weight: bold;
@@ -76,13 +81,21 @@
             border-radius: 25px;
             font-size: 16px;
             cursor: pointer;
-            display: block;
-            margin: 20px auto;
+            display: inline-block;
+            margin: 10px;
             transition: transform 0.2s;
         }
 
         .btn:hover {
             transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
         }
 
         .question-list {
@@ -110,20 +123,79 @@
             font-size: 12px;
             margin-left: 10px;
         }
+
+        .alert {
+            padding: 15px;
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+
+        .button-group {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .progress {
+            display: none;
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            height: 30px;
+            background: #f0f0f0;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📊 SAT Platform Question Counter</h1>
+        <h1>📊 SAT Platform Question Manager</h1>
         
         <div id="status" class="status">
             <div class="loading">🔄 Connecting to Firebase...</div>
         </div>
 
-        <button id="checkBtn" class="btn" style="display: none;">Check Questions</button>
+        <div class="button-group">
+            <button id="checkBtn" class="btn">🔍 Check Questions</button>
+            <button id="analyzeBtn" class="btn btn-success">🔬 Analyze Content</button>
+            <button id="fixBtn" class="btn btn-danger" style="display: none;">🔧 Fix Question Types</button>
+        </div>
+
+        <div id="progressDiv" class="progress">
+            <div class="progress-bar">
+                <div id="progressFill" class="progress-fill">0%</div>
+            </div>
+        </div>
+
+        <div id="alert" class="alert" style="display: none;"></div>
 
         <div id="questionList" class="question-list" style="display: none;">
-            <h3>Questions by Type:</h3>
+            <h3>Question Analysis:</h3>
             <div id="questionDetails"></div>
         </div>
     </div>
@@ -149,27 +221,36 @@
 
         const statusDiv = document.getElementById('status');
         const checkBtn = document.getElementById('checkBtn');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const fixBtn = document.getElementById('fixBtn');
+        const alertDiv = document.getElementById('alert');
         const questionList = document.getElementById('questionList');
         const questionDetails = document.getElementById('questionDetails');
+        const progressDiv = document.getElementById('progressDiv');
+        const progressFill = document.getElementById('progressFill');
+
+        let allQuestions = [];
 
         async function checkQuestions() {
+            console.log('Starting question check...');
             statusDiv.innerHTML = '<div class="loading">🔍 Checking questions in database...</div>';
+            alertDiv.style.display = 'none';
             
             try {
                 // Check satQuestions collection
                 const snapshot = await db.collection('satQuestions').get();
-                const questions = [];
+                allQuestions = [];
                 
                 snapshot.forEach(doc => {
                     const data = doc.data();
-                    questions.push({
+                    allQuestions.push({
                         id: doc.id,
-                        type: data.type || 'Unknown',
-                        difficulty: data.difficulty || 'Unknown',
-                        sourceTag: data.sourceTag || 'Unknown',
-                        question: data.question ? data.question.substring(0, 50) + '...' : 'No question text'
+                        ...data,
+                        type: data.type || 'Unknown'
                     });
                 });
+
+                console.log(`Found ${allQuestions.length} questions`);
 
                 // Count by type
                 const counts = {
@@ -182,26 +263,30 @@
                 // Count by source tag
                 const sourceTags = {};
 
-                questions.forEach(q => {
-                    counts[q.type] = (counts[q.type] || 0) + 1;
-                    sourceTags[q.sourceTag] = (sourceTags[q.sourceTag] || 0) + 1;
+                allQuestions.forEach(q => {
+                    const type = q.type || 'Unknown';
+                    counts[type] = (counts[type] || 0) + 1;
+                    if (q.sourceTag) {
+                        sourceTags[q.sourceTag] = (sourceTags[q.sourceTag] || 0) + 1;
+                    }
                 });
 
                 // Display results
                 let statusHTML = `
                     <div class="status-item">
                         <span>Total Questions:</span>
-                        <span class="success">${questions.length}</span>
+                        <span class="success">${allQuestions.length}</span>
                     </div>
                 `;
 
                 // Display by type
                 Object.keys(counts).forEach(type => {
                     if (counts[type] > 0) {
+                        const colorClass = type === 'Unknown' ? 'warning' : 'success';
                         statusHTML += `
                             <div class="status-item">
                                 <span>${type}:</span>
-                                <span class="success">${counts[type]}</span>
+                                <span class="${colorClass}">${counts[type]}</span>
                             </div>
                         `;
                     }
@@ -220,13 +305,14 @@
                     `;
                 });
 
-                // Show first few questions as sample
+                // Show sample questions
                 detailsHTML += '<h4 style="margin-top: 20px;">Sample Questions:</h4>';
-                questions.slice(0, 5).forEach(q => {
+                allQuestions.slice(0, 5).forEach(q => {
+                    const questionText = q.question ? q.question.substring(0, 60) + '...' : 'No question text';
                     detailsHTML += `
                         <div class="question-item">
-                            <strong>${q.type}</strong> - ${q.question}
-                            <span class="tag">${q.sourceTag}</span>
+                            <strong>${q.type}</strong> - ${questionText}
+                            <span class="tag">${q.sourceTag || 'No tag'}</span>
                         </div>
                     `;
                 });
@@ -234,37 +320,148 @@
                 questionDetails.innerHTML = detailsHTML;
                 questionList.style.display = 'block';
 
-                // Add collection check info
-                statusHTML += `
-                    <div class="status-item" style="margin-top: 20px; background: #fff3cd; color: #856404;">
-                        <span>Collection:</span>
-                        <span>satQuestions ✓</span>
-                    </div>
-                `;
-                statusDiv.innerHTML = statusHTML;
+                // Show alert if questions need fixing
+                if (counts.Unknown > 0) {
+                    alertDiv.innerHTML = `
+                        <strong>⚠️ Action Needed:</strong> ${counts.Unknown} questions have no type assigned.
+                        <br>Click "Analyze Content" to detect question types automatically.
+                    `;
+                    alertDiv.className = 'alert alert-danger';
+                    alertDiv.style.display = 'block';
+                    fixBtn.style.display = 'inline-block';
+                } else {
+                    alertDiv.innerHTML = `
+                        <strong>✅ All Good!</strong> All questions have proper types assigned.
+                    `;
+                    alertDiv.className = 'alert alert-success';
+                    alertDiv.style.display = 'block';
+                }
 
             } catch (error) {
+                console.error('Error checking questions:', error);
                 statusDiv.innerHTML = `
                     <div class="error">❌ Error: ${error.message}</div>
-                    <div style="margin-top: 10px; padding: 10px; background: #f8d7da; border-radius: 5px;">
-                        <strong>Troubleshooting:</strong><br>
-                        1. Check if Firestore is enabled in Firebase Console<br>
-                        2. Verify collection name is "satQuestions"<br>
-                        3. Check Firebase rules allow read access
-                    </div>
                 `;
+                alertDiv.innerHTML = `
+                    <strong>Troubleshooting:</strong><br>
+                    1. Check if Firestore is enabled in Firebase Console<br>
+                    2. Verify collection name is "satQuestions"<br>
+                    3. Check Firebase rules allow read access
+                `;
+                alertDiv.className = 'alert alert-danger';
+                alertDiv.style.display = 'block';
             }
         }
 
+        async function analyzeContent() {
+            console.log('Analyzing question content...');
+            statusDiv.innerHTML = '<div class="loading">🔬 Analyzing question content to detect types...</div>';
+            
+            const detectedTypes = {
+                Math: 0,
+                Reading: 0,
+                Writing: 0,
+                Unknown: 0
+            };
+
+            allQuestions.forEach(q => {
+                const content = (q.question || '').toLowerCase();
+                let detectedType = 'Unknown';
+
+                // Math detection patterns
+                if (content.match(/equation|calculate|solve|x\s*=|y\s*=|graph|function|angle|triangle|circle|radius|area|volume|percent|ratio|probability|statistics|algebra|geometry|^\d+\.\s*\$?\d+/)) {
+                    detectedType = 'Math';
+                }
+                // Reading detection patterns
+                else if (content.match(/passage|excerpt|author|main idea|tone|purpose|infer|suggest|primarily|according to|text|paragraph|lines?/)) {
+                    detectedType = 'Reading';
+                }
+                // Writing detection patterns
+                else if (content.match(/sentence|grammar|punctuation|transition|combine|revise|edit|clarity|concise|which choice|underlined|NO CHANGE/)) {
+                    detectedType = 'Writing';
+                }
+
+                q.detectedType = detectedType;
+                detectedTypes[detectedType]++;
+            });
+
+            // Display analysis results
+            let analysisHTML = `
+                <h3>📊 Content Analysis Results:</h3>
+                <div class="status-item">
+                    <span>Detected as Math:</span>
+                    <span class="success">${detectedTypes.Math}</span>
+                </div>
+                <div class="status-item">
+                    <span>Detected as Reading:</span>
+                    <span class="success">${detectedTypes.Reading}</span>
+                </div>
+                <div class="status-item">
+                    <span>Detected as Writing:</span>
+                    <span class="success">${detectedTypes.Writing}</span>
+                </div>
+                <div class="status-item">
+                    <span>Could not detect:</span>
+                    <span class="warning">${detectedTypes.Unknown}</span>
+                </div>
+            `;
+
+            statusDiv.innerHTML = analysisHTML;
+
+            if (detectedTypes.Math + detectedTypes.Reading + detectedTypes.Writing > 0) {
+                alertDiv.innerHTML = `
+                    <strong>✅ Analysis Complete!</strong> Detected types for ${detectedTypes.Math + detectedTypes.Reading + detectedTypes.Writing} questions.
+                    <br>Click "Fix Question Types" to update the database.
+                `;
+                alertDiv.className = 'alert alert-success';
+                alertDiv.style.display = 'block';
+                fixBtn.style.display = 'inline-block';
+            }
+        }
+
+        async function fixQuestionTypes() {
+            if (!confirm('This will update all questions with detected types. Continue?')) {
+                return;
+            }
+
+            progressDiv.style.display = 'block';
+            let processed = 0;
+            const total = allQuestions.filter(q => q.detectedType && q.detectedType !== 'Unknown').length;
+
+            for (const question of allQuestions) {
+                if (question.detectedType && question.detectedType !== 'Unknown') {
+                    try {
+                        await db.collection('satQuestions').doc(question.id).update({
+                            type: question.detectedType
+                        });
+                        processed++;
+                        const percent = Math.round((processed / total) * 100);
+                        progressFill.style.width = percent + '%';
+                        progressFill.textContent = percent + '%';
+                    } catch (error) {
+                        console.error(`Error updating question ${question.id}:`, error);
+                    }
+                }
+            }
+
+            alertDiv.innerHTML = `
+                <strong>✅ Complete!</strong> Updated ${processed} questions with proper types.
+                <br>Click "Check Questions" to verify the updates.
+            `;
+            alertDiv.className = 'alert alert-success';
+            alertDiv.style.display = 'block';
+            progressDiv.style.display = 'none';
+        }
+
+        // Event listeners
+        checkBtn.addEventListener('click', checkQuestions);
+        analyzeBtn.addEventListener('click', analyzeContent);
+        fixBtn.addEventListener('click', fixQuestionTypes);
+
         // Auto-check on load
         window.addEventListener('load', () => {
-            setTimeout(() => {
-                checkQuestions();
-                checkBtn.style.display = 'block';
-            }, 1000);
+            setTimeout(checkQuestions, 1000);
         });
-
-        checkBtn.addEventListener('click', checkQuestions);
     </script>
 </body>
 </html>
