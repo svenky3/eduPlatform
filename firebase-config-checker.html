@@ -119,6 +119,11 @@
     <div class="container">
         <h1>🔧 Firebase Configuration Checker</h1>
         <p style="margin-bottom: 20px;">Let's fix your Firebase authentication issues step by step</p>
+        
+        <div class="success">
+            ✅ <strong>Updated with your CORRECT API Key!</strong><br>
+            Using: AIzaSyAv4Z5vAl8knY9RNs_U5VFObU3WKJGuxqg
+        </div>
 
         <div class="instructions">
             <h2>📋 Step 1: Get Your Correct Firebase Config</h2>
@@ -136,12 +141,12 @@
             <h2>📝 Step 2: Paste Your Firebase Config Here</h2>
             <textarea id="configInput" class="config-input" rows="12" placeholder="Paste your Firebase config object here...">
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyAv4Z5vAl8knY9RNs_U5VFObU3WKJGuxqg",
+    authDomain: "sat-education-platform.firebaseapp.com",
+    projectId: "sat-education-platform",
+    storageBucket: "sat-education-platform.appspot.com",
+    messagingSenderId: "296721018166",
+    appId: "1:296721018166:web:5e96a5e3e37e4fd85c04ae"
 };</textarea>
             <button onclick="testConfig()">🔍 Test Configuration</button>
             <button onclick="useKnownConfig()">📋 Use Known Config</button>
@@ -189,11 +194,11 @@ const firebaseConfig = {
         </div>
 
         <div class="config-section">
-            <h2>✅ Correct Configuration</h2>
-            <p>Your Firebase config should look like this:</p>
+            <h2>✅ Your Working Configuration</h2>
+            <p><strong>This is your CORRECT Firebase config with the VALID API key:</strong></p>
             <div class="code-block" id="correctConfig">
 const firebaseConfig = {
-    apiKey: "AIzaSyBfqPSgE6im1qAIHpNqmf3rWDRmXq3t0WA",
+    apiKey: "AIzaSyAv4Z5vAl8knY9RNs_U5VFObU3WKJGuxqg",
     authDomain: "sat-education-platform.firebaseapp.com",
     projectId: "sat-education-platform",
     storageBucket: "sat-education-platform.appspot.com",
@@ -202,6 +207,10 @@ const firebaseConfig = {
 };
             </div>
             <button onclick="copyConfig()">📋 Copy Correct Config</button>
+            <div class="success" style="margin-top: 10px;">
+                <strong>📝 Update ALL your files with this configuration!</strong><br>
+                Files to update: sat-uploader-tagged.html, sat-diagnostic.html, sat-prep-v4.html, comprehensive-admin-dashboard.html
+            </div>
         </div>
 
         <div class="config-section">
@@ -214,6 +223,11 @@ const firebaseConfig = {
 
         <div class="instructions">
             <h2>❓ Common Issues & Solutions</h2>
+            <div class="error">
+                <strong>⚠️ OLD API KEY DETECTED!</strong><br>
+                If you were using: <code>AIzaSyBfqPSgE6im1qAIHpNqmf3rWDRmXq3t0WA</code><br>
+                This key is INVALID. Use the new key: <code>AIzaSyAv4Z5vAl8knY9RNs_U5VFObU3WKJGuxqg</code>
+            </div>
             <div class="warning">
                 <strong>Error: auth/api-key-not-valid</strong><br>
                 → API key is wrong or has restrictions. Check Google Cloud Console.
@@ -242,7 +256,7 @@ const firebaseConfig = {
         // Use known working config
         function useKnownConfig() {
             const knownConfig = `const firebaseConfig = {
-    apiKey: "AIzaSyBfqPSgE6im1qAIHpNqmf3rWDRmXq3t0WA",
+    apiKey: "AIzaSyAv4Z5vAl8knY9RNs_U5VFObU3WKJGuxqg",
     authDomain: "sat-education-platform.firebaseapp.com",
     projectId: "sat-education-platform",
     storageBucket: "sat-education-platform.appspot.com",
@@ -319,7 +333,7 @@ const firebaseConfig = {
                 // Try to initialize with known config
                 try {
                     const config = {
-                        apiKey: "AIzaSyBfqPSgE6im1qAIHpNqmf3rWDRmXq3t0WA",
+                        apiKey: "AIzaSyAv4Z5vAl8knY9RNs_U5VFObU3WKJGuxqg",
                         authDomain: "sat-education-platform.firebaseapp.com",
                         projectId: "sat-education-platform",
                         storageBucket: "sat-education-platform.appspot.com",
@@ -363,7 +377,7 @@ const firebaseConfig = {
                 // Try to initialize with known config
                 try {
                     const config = {
-                        apiKey: "AIzaSyBfqPSgE6im1qAIHpNqmf3rWDRmXq3t0WA",
+                        apiKey: "AIzaSyAv4Z5vAl8knY9RNs_U5VFObU3WKJGuxqg",
                         authDomain: "sat-education-platform.firebaseapp.com",
                         projectId: "sat-education-platform",
                         storageBucket: "sat-education-platform.appspot.com",
