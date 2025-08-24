@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Firebase Tester - Working Version</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .success-box {
+            background: #10b981;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .error-box {
+            background: #ef4444;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .info-box {
+            background: #3b82f6;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .config-display {
+            background: #1f2937;
+            color: #10b981;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 10px 10px 0;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .green-button {
+            background: #10b981;
+        }
+
+        .green-button:hover {
+            background: #059669;
+        }
+
+        .result-area {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f3f4f6;
+            border-radius: 8px;
+            min-height: 100px;
+        }
+
+        .loading {
+            text-align: center;
+            color: #667eea;
+        }
+
+        strong {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        code {
+            background: #fef3c7;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #92400e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Simple Firebase Authentication Tester</h1>
+        
+        <div class="success-box">
+            <strong>✅ This page uses your CORRECT API key!</strong>
+            API Key: AIzaSyAv4Z5vAl8knY9RNs_U5VFObU3WKJGuxqg
+        </div>
+
+        <div class="info-box">
+            <strong>📌 Current Status:</strong>
+            <div id="currentStatus">Page loaded. Ready to test.</div>
+        </div>
+
+        <div class="config-display">
+// Your Working Firebase Configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyAv4Z5vAl8knY9RNs_U5VFObU3WKJGuxqg",
+    authDomain: "sat-education-platform.firebaseapp.com",
+    projectId: "sat-education-platform",
+    storageBucket: "sat-education-platform.appspot.com",
+    messagingSenderId: "296721018166",
+    appId: "1:296721018166:web:5e96a5e3e37e4fd85c04ae"
+};
+        </div>
+
+        <div>
+            <button onclick="testSignIn()" class="green-button">
+                🔐 Test Sign In with Google
+            </button>
+            <button onclick="testDatabase()">
+                📊 Test Database Connection
+            </button>
+            <button onclick="copyConfig()">
+                📋 Copy Config
+            </button>
+            <button onclick="resetTest()">
+                🔄 Reset
+            </button>
+        </div>
+
+        <div class="result-area" id="resultArea">
+            <strong>Test Results:</strong>
+            <div id="results">Click a button above to start testing...</div>
+        </div>
+
+        <div style="margin-top: 20px; padding: 20px; background: #fef3c7; border-radius: 8px;">
+            <strong>📝 Files to Update with this Config:</strong>
+            <ul style="margin-top: 10px; margin-left: 20px;">
+                <li>sat-uploader-tagged.html</li>
+                <li>sat-diagnostic.html</li>
+                <li>sat-prep-v4.html</li>
+                <li>comprehensive-admin-dashboard.html</li>
+            </ul>
+            <p style="margin-top: 10px;">
+                <strong>Find & Replace:</strong><br>
+                Old key: <code>AIzaSyBfqPSgE6im1qAIHpNqmf3rWDRmXq3t0WA</code><br>
+                New key: <code>AIzaSyAv4Z5vAl8knY9RNs_U5VFObU3WKJGuxqg</code>
+            </p>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Your CORRECT Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAv4Z5vAl8knY9RNs_U5VFObU3WKJGuxqg",
+            authDomain: "sat-education-platform.firebaseapp.com",
+            projectId: "sat-education-platform",
+            storageBucket: "sat-education-platform.appspot.com",
+            messagingSenderId: "296721018166",
+            appId: "1:296721018166:web:5e96a5e3e37e4fd85c04ae"
+        };
+
+        // Initialize Firebase ONCE
+        let app = null;
+        let auth = null;
+        let db = null;
+
+        try {
+            app = firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            db = firebase.firestore();
+            updateStatus('✅ Firebase initialized successfully!', 'success');
+        } catch (error) {
+            updateStatus('❌ Firebase initialization failed: ' + error.message, 'error');
+        }
+
+        // Test Sign In
+        async function testSignIn() {
+            updateResults('<div class="loading">Testing authentication...</div>');
+            
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                provider.setCustomParameters({
+                    prompt: 'select_account'
+                });
+                
+                const result = await auth.signInWithPopup(provider);
+                const user = result.user;
+                
+                updateStatus('✅ Signed in as: ' + user.email, 'success');
+                updateResults(`
+                    <div style="color: green;">
+                        <strong>✅ Authentication Successful!</strong>
+                        <p>User: ${user.email}</p>
+                        <p>Name: ${user.displayName}</p>
+                        <p>UID: ${user.uid}</p>
+                        <br>
+                        <strong>🎉 Everything is working!</strong>
+                        <p>Now update all your files with the correct API key.</p>
+                    </div>
+                `);
+                
+                // Now test database access
+                await testDatabaseAfterAuth();
+                
+            } catch (error) {
+                updateStatus('❌ Sign-in failed', 'error');
+                updateResults(`
+                    <div style="color: red;">
+                        <strong>❌ Authentication Failed</strong>
+                        <p>Error Code: ${error.code}</p>
+                        <p>Message: ${error.message}</p>
+                        <br>
+                        <strong>Troubleshooting:</strong>
+                        <ul style="margin-left: 20px;">
+                            <li>Check if popups are blocked</li>
+                            <li>Verify Google auth is enabled in Firebase Console</li>
+                            <li>Check if your domain (${window.location.hostname}) is authorized</li>
+                            <li>Try opening this file locally first</li>
+                        </ul>
+                    </div>
+                `);
+            }
+        }
+
+        // Test Database
+        async function testDatabase() {
+            updateResults('<div class="loading">Testing database connection...</div>');
+            
+            try {
+                const collections = ['satQuestions', 'quizQuestions', 'questions'];
+                let results = '<strong>Database Test Results:</strong><br><br>';
+                let totalDocs = 0;
+                
+                for (const collName of collections) {
+                    try {
+                        const snapshot = await db.collection(collName).limit(5).get();
+                        const size = snapshot.size;
+                        totalDocs += size;
+                        
+                        if (size > 0) {
+                            results += `✅ <strong>${collName}:</strong> Found ${size} document(s)<br>`;
+                            
+                            // Show sample data
+                            const firstDoc = snapshot.docs[0].data();
+                            results += `&nbsp;&nbsp;&nbsp;&nbsp;Sample: ${JSON.stringify(firstDoc).substring(0, 100)}...<br><br>`;
+                        } else {
+                            results += `⚠️ <strong>${collName}:</strong> Collection exists but is empty<br><br>`;
+                        }
+                    } catch (error) {
+                        results += `❌ <strong>${collName}:</strong> ${error.message}<br><br>`;
+                    }
+                }
+                
+                if (totalDocs === 0) {
+                    results += '<br><strong>⚠️ No documents found!</strong><br>';
+                    results += 'You need to upload questions using the uploader tool.<br>';
+                } else {
+                    results += `<br><strong>✅ Total documents found: ${totalDocs}</strong>`;
+                }
+                
+                updateResults(results);
+                updateStatus(`Database test complete. Found ${totalDocs} total documents.`, totalDocs > 0 ? 'success' : 'warning');
+                
+            } catch (error) {
+                updateResults(`
+                    <div style="color: red;">
+                        <strong>❌ Database Test Failed</strong>
+                        <p>${error.message}</p>
+                        <p>You may need to sign in first to access the database.</p>
+                    </div>
+                `);
+                updateStatus('❌ Database test failed', 'error');
+            }
+        }
+
+        // Test database after authentication
+        async function testDatabaseAfterAuth() {
+            try {
+                const snapshot = await db.collection('satQuestions').limit(1).get();
+                const count = snapshot.size;
+                
+                const dbStatus = document.createElement('div');
+                dbStatus.style.marginTop = '20px';
+                dbStatus.innerHTML = `
+                    <strong>📊 Database Access:</strong>
+                    <p>✅ Can access database after authentication</p>
+                    <p>Found ${count} document(s) in satQuestions collection</p>
+                `;
+                document.getElementById('results').appendChild(dbStatus);
+            } catch (error) {
+                console.error('Database access error:', error);
+            }
+        }
+
+        // Copy configuration
+        function copyConfig() {
+            const configText = `const firebaseConfig = {
+    apiKey: "AIzaSyAv4Z5vAl8knY9RNs_U5VFObU3WKJGuxqg",
+    authDomain: "sat-education-platform.firebaseapp.com",
+    projectId: "sat-education-platform",
+    storageBucket: "sat-education-platform.appspot.com",
+    messagingSenderId: "296721018166",
+    appId: "1:296721018166:web:5e96a5e3e37e4fd85c04ae"
+};`;
+            
+            navigator.clipboard.writeText(configText).then(() => {
+                updateStatus('✅ Configuration copied to clipboard!', 'success');
+                updateResults('Configuration copied! Now paste it into all your Firebase files.');
+            }).catch(() => {
+                updateResults(`<textarea style="width: 100%; height: 150px;">${configText}</textarea>`);
+                updateStatus('Select and copy the configuration above', 'info');
+            });
+        }
+
+        // Reset test
+        function resetTest() {
+            updateStatus('Page reset. Ready to test.', 'info');
+            updateResults('Click a button above to start testing...');
+        }
+
+        // Update status
+        function updateStatus(message, type) {
+            const statusDiv = document.getElementById('currentStatus');
+            statusDiv.innerHTML = message;
+            
+            // Update info box color based on type
+            const infoBox = statusDiv.parentElement;
+            infoBox.className = type === 'error' ? 'error-box' : 
+                               type === 'success' ? 'success-box' : 'info-box';
+        }
+
+        // Update results
+        function updateResults(html) {
+            document.getElementById('results').innerHTML = html;
+        }
+
+        // Check auth state on load
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                updateStatus(`✅ Already signed in as: ${user.email}`, 'success');
+            }
+        });
+
+        // Show current domain
+        window.addEventListener('load', () => {
+            console.log('Current domain:', window.location.hostname);
+            console.log('Firebase Config:', firebaseConfig);
+        });
+    </script>
+</body>
+</html>
