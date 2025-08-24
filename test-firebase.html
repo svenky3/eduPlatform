@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Firebase Test</title>
+</head>
+<body>
+    <h1>Firebase Quick Test</h1>
+    <button onclick="testFirebase()">Test Firebase</button>
+    <button onclick="testAuth()">Test Auth</button>
+    <div id="result"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBfqPSgE6im1qAIHpNqmf3rWDRmXq3t0WA",
+            authDomain: "sat-education-platform.firebaseapp.com",
+            projectId: "sat-education-platform",
+            storageBucket: "sat-education-platform.appspot.com",
+            messagingSenderId: "296721018166",
+            appId: "1:296721018166:web:5e96a5e3e37e4fd85c04ae"
+        };
+
+        let app, auth, db;
+        
+        function testFirebase() {
+            try {
+                app = firebase.initializeApp(firebaseConfig);
+                auth = firebase.auth();
+                db = firebase.firestore();
+                document.getElementById('result').innerHTML = '<p style="color:green">✅ Firebase initialized successfully!</p>';
+            } catch(error) {
+                document.getElementById('result').innerHTML = '<p style="color:red">❌ Error: ' + error.message + '</p>';
+            }
+        }
+
+        function testAuth() {
+            if (!auth) {
+                alert('Initialize Firebase first!');
+                return;
+            }
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider)
+                .then(result => {
+                    document.getElementById('result').innerHTML += '<p style="color:green">✅ Signed in as: ' + result.user.email + '</p>';
+                })
+                .catch(error => {
+                    document.getElementById('result').innerHTML += '<p style="color:red">❌ Auth Error: ' + error.code + ' - ' + error.message + '</p>';
+                });
+        }
+    </script>
+</body>
+</html>
