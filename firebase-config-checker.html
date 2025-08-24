@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Config Checker & Manual Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .config-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .config-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background: #764ba2;
+        }
+
+        .success {
+            background: #10b981;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .error {
+            background: #ef4444;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .warning {
+            background: #f59e0b;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .instructions {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .code-block {
+            background: #1f2937;
+            color: #10b981;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        .result-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f3f4f6;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Firebase Configuration Checker</h1>
+        <p style="margin-bottom: 20px;">Let's fix your Firebase authentication issues step by step</p>
+
+        <div class="instructions">
+            <h2>📋 Step 1: Get Your Correct Firebase Config</h2>
+            <ol>
+                <li>Go to <a href="https://console.firebase.google.com/" target="_blank">Firebase Console</a></li>
+                <li>Select your project: <strong>sat-education-platform</strong></li>
+                <li>Click the gear icon → <strong>Project settings</strong></li>
+                <li>Scroll down to <strong>Your apps</strong> section</li>
+                <li>Find your web app and click on <strong>Config</strong></li>
+                <li>Copy the entire configuration object</li>
+            </ol>
+        </div>
+
+        <div class="config-section">
+            <h2>📝 Step 2: Paste Your Firebase Config Here</h2>
+            <textarea id="configInput" class="config-input" rows="12" placeholder="Paste your Firebase config object here...">
+const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_STORAGE_BUCKET",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID"
+};</textarea>
+            <button onclick="testConfig()">🔍 Test Configuration</button>
+            <button onclick="useKnownConfig()">📋 Use Known Config</button>
+        </div>
+
+        <div id="resultSection" class="result-section" style="display: none;">
+            <h2>Test Results:</h2>
+            <div id="testResults"></div>
+        </div>
+
+        <div class="instructions">
+            <h2>🔐 Step 3: Fix Authentication Settings</h2>
+            <h3>In Firebase Console:</h3>
+            <ol>
+                <li><strong>Enable Authentication:</strong>
+                    <ul>
+                        <li>Go to Authentication → Sign-in method</li>
+                        <li>Enable <strong>Google</strong> provider</li>
+                        <li>Add your email as support email</li>
+                    </ul>
+                </li>
+                <li><strong>Add Authorized Domains:</strong>
+                    <ul>
+                        <li>Go to Authentication → Settings → Authorized domains</li>
+                        <li>Add: <code>svenky3.github.io</code></li>
+                        <li>Add: <code>localhost</code> (for testing)</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <h3>In Google Cloud Console:</h3>
+            <ol>
+                <li>Go to <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a></li>
+                <li>Select your project</li>
+                <li>APIs & Services → Credentials</li>
+                <li>Find your Browser API key</li>
+                <li>Click Edit → Application restrictions → <strong>None</strong></li>
+                <li>OR add HTTP referrers:
+                    <ul>
+                        <li><code>https://svenky3.github.io/*</code></li>
+                        <li><code>http://localhost/*</code></li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+
+        <div class="config-section">
+            <h2>✅ Correct Configuration</h2>
+            <p>Your Firebase config should look like this:</p>
+            <div class="code-block" id="correctConfig">
+const firebaseConfig = {
+    apiKey: "AIzaSyBfqPSgE6im1qAIHpNqmf3rWDRmXq3t0WA",
+    authDomain: "sat-education-platform.firebaseapp.com",
+    projectId: "sat-education-platform",
+    storageBucket: "sat-education-platform.appspot.com",
+    messagingSenderId: "296721018166",
+    appId: "1:296721018166:web:5e96a5e3e37e4fd85c04ae"
+};
+            </div>
+            <button onclick="copyConfig()">📋 Copy Correct Config</button>
+        </div>
+
+        <div class="config-section">
+            <h2>🚀 Quick Test Without Authentication</h2>
+            <p>Test your Firebase connection without signing in:</p>
+            <button onclick="testDatabaseConnection()">🔍 Test Database Connection</button>
+            <button onclick="testAuthSetup()">🔐 Test Auth Setup</button>
+            <div id="quickTestResults"></div>
+        </div>
+
+        <div class="instructions">
+            <h2>❓ Common Issues & Solutions</h2>
+            <div class="warning">
+                <strong>Error: auth/api-key-not-valid</strong><br>
+                → API key is wrong or has restrictions. Check Google Cloud Console.
+            </div>
+            <div class="warning">
+                <strong>Error: auth/unauthorized-domain</strong><br>
+                → Add your domain in Firebase Console → Authentication → Settings
+            </div>
+            <div class="warning">
+                <strong>Error: auth/operation-not-allowed</strong><br>
+                → Enable Google sign-in in Firebase Console → Authentication
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        let app = null;
+        let auth = null;
+        let db = null;
+
+        // Use known working config
+        function useKnownConfig() {
+            const knownConfig = `const firebaseConfig = {
+    apiKey: "AIzaSyBfqPSgE6im1qAIHpNqmf3rWDRmXq3t0WA",
+    authDomain: "sat-education-platform.firebaseapp.com",
+    projectId: "sat-education-platform",
+    storageBucket: "sat-education-platform.appspot.com",
+    messagingSenderId: "296721018166",
+    appId: "1:296721018166:web:5e96a5e3e37e4fd85c04ae"
+};`;
+            document.getElementById('configInput').value = knownConfig;
+            alert('Known configuration loaded. Click "Test Configuration" to verify.');
+        }
+
+        // Test the configuration
+        function testConfig() {
+            const configText = document.getElementById('configInput').value;
+            
+            try {
+                // Extract config object from text
+                const configMatch = configText.match(/\{[\s\S]*\}/);
+                if (!configMatch) {
+                    showResult('error', 'Invalid configuration format. Please paste the complete config object.');
+                    return;
+                }
+                
+                // Parse the config
+                const configStr = configMatch[0]
+                    .replace(/(\w+):/g, '"$1":')  // Add quotes to keys
+                    .replace(/'/g, '"')            // Replace single quotes with double
+                    .replace(/,\s*}/, '}');        // Remove trailing comma
+                
+                const config = JSON.parse(configStr);
+                
+                // Validate required fields
+                const requiredFields = ['apiKey', 'authDomain', 'projectId'];
+                const missingFields = requiredFields.filter(field => !config[field]);
+                
+                if (missingFields.length > 0) {
+                    showResult('error', `Missing required fields: ${missingFields.join(', ')}`);
+                    return;
+                }
+                
+                // Initialize Firebase with the config
+                try {
+                    if (app) {
+                        app.delete(); // Delete existing app
+                    }
+                    app = firebase.initializeApp(config);
+                    auth = firebase.auth();
+                    db = firebase.firestore();
+                    
+                    showResult('success', 'Configuration is valid! Firebase initialized successfully.');
+                    
+                    // Show additional info
+                    const info = `
+                        <div style="margin-top: 10px;">
+                            <strong>Config Details:</strong><br>
+                            Project ID: ${config.projectId}<br>
+                            Auth Domain: ${config.authDomain}<br>
+                            API Key: ${config.apiKey.substring(0, 10)}...
+                        </div>
+                    `;
+                    document.getElementById('testResults').innerHTML += info;
+                    
+                } catch (initError) {
+                    showResult('error', `Firebase initialization failed: ${initError.message}`);
+                }
+                
+            } catch (error) {
+                showResult('error', `Configuration parsing failed: ${error.message}`);
+            }
+        }
+
+        // Test database connection
+        async function testDatabaseConnection() {
+            if (!db) {
+                // Try to initialize with known config
+                try {
+                    const config = {
+                        apiKey: "AIzaSyBfqPSgE6im1qAIHpNqmf3rWDRmXq3t0WA",
+                        authDomain: "sat-education-platform.firebaseapp.com",
+                        projectId: "sat-education-platform",
+                        storageBucket: "sat-education-platform.appspot.com",
+                        messagingSenderId: "296721018166",
+                        appId: "1:296721018166:web:5e96a5e3e37e4fd85c04ae"
+                    };
+                    
+                    if (app) app.delete();
+                    app = firebase.initializeApp(config);
+                    db = firebase.firestore();
+                } catch (e) {
+                    showQuickResult('error', 'Failed to initialize Firebase. Please test configuration first.');
+                    return;
+                }
+            }
+            
+            try {
+                // Try to read from public collections
+                const collections = ['satQuestions', 'quizQuestions', 'questions'];
+                let results = '<strong>Database Test Results:</strong><br>';
+                
+                for (const coll of collections) {
+                    try {
+                        const snapshot = await db.collection(coll).limit(1).get();
+                        const count = snapshot.size;
+                        results += `✅ Collection "${coll}": ${count > 0 ? 'Found data' : 'Empty or not accessible'}<br>`;
+                    } catch (e) {
+                        results += `❌ Collection "${coll}": ${e.message}<br>`;
+                    }
+                }
+                
+                showQuickResult('success', results);
+            } catch (error) {
+                showQuickResult('error', `Database test failed: ${error.message}`);
+            }
+        }
+
+        // Test auth setup
+        async function testAuthSetup() {
+            if (!auth) {
+                // Try to initialize with known config
+                try {
+                    const config = {
+                        apiKey: "AIzaSyBfqPSgE6im1qAIHpNqmf3rWDRmXq3t0WA",
+                        authDomain: "sat-education-platform.firebaseapp.com",
+                        projectId: "sat-education-platform",
+                        storageBucket: "sat-education-platform.appspot.com",
+                        messagingSenderId: "296721018166",
+                        appId: "1:296721018166:web:5e96a5e3e37e4fd85c04ae"
+                    };
+                    
+                    if (app) app.delete();
+                    app = firebase.initializeApp(config);
+                    auth = firebase.auth();
+                } catch (e) {
+                    showQuickResult('error', 'Failed to initialize Firebase. Please test configuration first.');
+                    return;
+                }
+            }
+            
+            try {
+                // Check if Google auth is available
+                const provider = new firebase.auth.GoogleAuthProvider();
+                
+                let results = '<strong>Auth Test Results:</strong><br>';
+                results += `✅ Firebase Auth initialized<br>`;
+                results += `✅ Google Auth Provider available<br>`;
+                results += `Current domain: ${window.location.hostname}<br>`;
+                
+                if (window.location.hostname === 'svenky3.github.io') {
+                    results += `✅ Running on authorized domain<br>`;
+                } else if (window.location.hostname === 'localhost') {
+                    results += `⚠️ Running on localhost - make sure it's authorized<br>`;
+                } else {
+                    results += `⚠️ Running on ${window.location.hostname} - add to authorized domains<br>`;
+                }
+                
+                showQuickResult('success', results);
+                
+                // Try a test sign-in
+                if (confirm('Try a test sign-in?')) {
+                    try {
+                        await auth.signInWithPopup(provider);
+                        showQuickResult('success', 'Sign-in successful!');
+                    } catch (signInError) {
+                        showQuickResult('error', `Sign-in failed: ${signInError.code} - ${signInError.message}`);
+                    }
+                }
+                
+            } catch (error) {
+                showQuickResult('error', `Auth test failed: ${error.message}`);
+            }
+        }
+
+        // Show result
+        function showResult(type, message) {
+            document.getElementById('resultSection').style.display = 'block';
+            document.getElementById('testResults').innerHTML = `<div class="${type}">${message}</div>`;
+        }
+
+        // Show quick test result
+        function showQuickResult(type, message) {
+            document.getElementById('quickTestResults').innerHTML = `<div class="${type}" style="margin-top: 10px;">${message}</div>`;
+        }
+
+        // Copy config to clipboard
+        function copyConfig() {
+            const config = document.getElementById('correctConfig').textContent;
+            navigator.clipboard.writeText(config).then(() => {
+                alert('Configuration copied to clipboard!');
+            });
+        }
+    </script>
+</body>
+</html>
