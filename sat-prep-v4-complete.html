@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAT Prep Platform v4 - Complete</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.2em;
+        }
+
+        .sign-in-container {
+            text-align: center;
+            padding: 60px;
+        }
+
+        .sign-in-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 40px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .sign-in-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .dashboard {
+            display: none;
+        }
+
+        .user-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .subject-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .subject-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .subject-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .card-count {
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+
+        .quiz-options {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .quiz-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .quiz-btn:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #764ba2;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Quiz Container Styles */
+        .quiz-container {
+            display: none;
+        }
+
+        .quiz-header {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .quiz-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .quiz-title {
+            font-size: 1.5em;
+            color: #333;
+        }
+
+        .question-counter {
+            background: #667eea;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            background: #e9ecef;
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            transition: width 0.3s;
+        }
+
+        .question-container {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            min-height: 400px;
+        }
+
+        .question-text {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option {
+            background: white;
+            padding: 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #f0f0ff;
+        }
+
+        .option.correct {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .option.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .option-letter {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+
+        .option.selected .option-letter {
+            background: #764ba2;
+        }
+
+        .grid-in-container {
+            text-align: center;
+        }
+
+        .grid-in-input {
+            width: 200px;
+            padding: 20px;
+            font-size: 1.5em;
+            text-align: center;
+            border: 3px solid #667eea;
+            border-radius: 10px;
+            margin: 20px auto;
+        }
+
+        .quiz-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .nav-btn {
+            background: #6c757d;
+            padding: 12px 30px;
+        }
+
+        .submit-btn {
+            background: #28a745;
+            padding: 12px 30px;
+        }
+
+        /* Results Container */
+        .results-container {
+            display: none;
+            text-align: center;
+        }
+
+        .results-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border: 8px solid white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+            font-size: 3em;
+            font-weight: bold;
+        }
+
+        .results-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .review-container {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .review-question {
+            padding: 15px;
+            margin-bottom: 15px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #e9ecef;
+        }
+
+        .review-question.correct {
+            border-left-color: #28a745;
+        }
+
+        .review-question.incorrect {
+            border-left-color: #dc3545;
+        }
+
+        .timer {
+            background: #fff3cd;
+            color: #856404;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sign In Screen -->
+        <div id="signInScreen" class="sign-in-container">
+            <h1>🎓 SAT Prep Platform</h1>
+            <p class="subtitle">Practice with Real SAT Questions</p>
+            <br><br>
+            <button class="sign-in-btn" onclick="signIn()">
+                🔐 Sign In with Google to Start
+            </button>
+        </div>
+
+        <!-- Main Dashboard -->
+        <div id="dashboard" class="dashboard">
+            <div class="header">
+                <h1>🎓 SAT Practice Test</h1>
+                <p class="subtitle">Master the SAT with Real Questions</p>
+            </div>
+
+            <div class="user-info">
+                <div>
+                    <strong>Welcome:</strong> <span id="userName">Student</span>
+                </div>
+                <div>
+                    <span class="timer" id="dashboardTimer"></span>
+                </div>
+                <button onclick="signOut()">Sign Out</button>
+            </div>
+
+            <div class="subject-grid" id="subjectGrid">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading questions...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Container -->
+        <div id="quizContainer" class="quiz-container">
+            <div class="quiz-header">
+                <div class="quiz-info">
+                    <button class="nav-btn" onclick="backToDashboard()">← Back to Dashboard</button>
+                    <div class="quiz-title" id="quizTitle">Math Quiz</div>
+                    <div class="question-counter" id="questionCounter">Question 1 of 10</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress" id="progressBar"></div>
+                </div>
+            </div>
+
+            <div class="question-container">
+                <div id="questionContent">
+                    <!-- Question content will be inserted here -->
+                </div>
+            </div>
+
+            <div class="quiz-navigation">
+                <button class="nav-btn" onclick="previousQuestion()" id="prevBtn">← Previous</button>
+                <button class="nav-btn" onclick="skipQuestion()" id="skipBtn">Skip</button>
+                <button class="nav-btn" onclick="nextQuestion()" id="nextBtn">Next →</button>
+                <button class="submit-btn" onclick="submitQuiz()" id="submitBtn" style="display: none;">Submit Quiz</button>
+            </div>
+        </div>
+
+        <!-- Results Container -->
+        <div id="resultsContainer" class="results-container">
+            <div class="results-header">
+                <h2>🎉 Quiz Complete!</h2>
+                <div class="score-circle" id="scoreCircle">0%</div>
+                <p id="resultMessage">Great job!</p>
+            </div>
+
+            <div class="results-stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="correctCount">0</div>
+                    <div class="stat-label">Correct</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="incorrectCount">0</div>
+                    <div class="stat-label">Incorrect</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="skippedCount">0</div>
+                    <div class="stat-label">Skipped</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="timeSpent">0:00</div>
+                    <div class="stat-label">Time Spent</div>
+                </div>
+            </div>
+
+            <div class="review-container" id="reviewContainer">
+                <h3>📝 Review Your Answers</h3>
+                <div id="reviewQuestions">
+                    <!-- Review questions will be inserted here -->
+                </div>
+            </div>
+
+            <div>
+                <button onclick="backToDashboard()">Back to Dashboard</button>
+                <button onclick="retakeQuiz()" style="margin-left: 10px;">Retake Quiz</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAv4Z5vAl8knY9RNs_U5VFObU3WKJGuxqg",
+            authDomain: "sat-education-platform.firebaseapp.com",
+            projectId: "sat-education-platform",
+            storageBucket: "sat-education-platform.appspot.com",
+            messagingSenderId: "296721018166",
+            appId: "1:296721018166:web:5e96a5e3e37e4fd85c04ae"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Global variables
+        let currentUser = null;
+        let currentQuiz = [];
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let quizStartTime = null;
+        let currentSubject = '';
+        let currentFormat = '';
+
+        // Sign In
+        async function signIn() {
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                const result = await auth.signInWithPopup(provider);
+                currentUser = result.user;
+                showDashboard();
+            } catch (error) {
+                console.error('Sign in error:', error);
+                alert('Sign in failed: ' + error.message);
+            }
+        }
+
+        // Sign Out
+        function signOut() {
+            auth.signOut().then(() => {
+                currentUser = null;
+                showSignInScreen();
+            });
+        }
+
+        // Show screens
+        function showSignInScreen() {
+            document.getElementById('signInScreen').style.display = 'block';
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('quizContainer').style.display = 'none';
+            document.getElementById('resultsContainer').style.display = 'none';
+        }
+
+        function showDashboard() {
+            document.getElementById('signInScreen').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('quizContainer').style.display = 'none';
+            document.getElementById('resultsContainer').style.display = 'none';
+            
+            document.getElementById('userName').textContent = currentUser.displayName || currentUser.email;
+            updateDashboardTime();
+            loadSubjects();
+        }
+
+        function showQuiz() {
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('quizContainer').style.display = 'block';
+            document.getElementById('resultsContainer').style.display = 'none';
+        }
+
+        function showResults() {
+            document.getElementById('quizContainer').style.display = 'none';
+            document.getElementById('resultsContainer').style.display = 'block';
+        }
+
+        // Update dashboard time
+        function updateDashboardTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            const dateString = now.toLocaleDateString('en-US', { 
+                weekday: 'short', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+            document.getElementById('dashboardTimer').textContent = `${dateString} • ${timeString}`;
+        }
+
+        // Load subjects
+        async function loadSubjects() {
+            const subjectGrid = document.getElementById('subjectGrid');
+            
+            try {
+                // Get question counts
+                const mathQuery = await db.collection('satQuestions')
+                    .where('subject', '==', 'math')
+                    .where('sourceTag', '==', 'SAT_World')
+                    .get();
+                
+                const readingQuery = await db.collection('satQuestions')
+                    .where('subject', '==', 'reading')
+                    .where('sourceTag', '==', 'SAT_World')
+                    .get();
+                
+                const writingQuery = await db.collection('satQuestions')
+                    .where('subject', '==', 'writing')
+                    .where('sourceTag', '==', 'SAT_World')
+                    .get();
+
+                // Get counts for different formats
+                const mathTraditional = mathQuery.docs.filter(doc => doc.data().format === 'traditional').length;
+                const mathGridIn = mathQuery.docs.filter(doc => doc.data().format === 'grid-in').length;
+
+                subjectGrid.innerHTML = `
+                    <div class="subject-card">
+                        <div class="card-icon">🔢</div>
+                        <div class="card-title">Math</div>
+                        <div class="card-count">${mathQuery.size} questions available</div>
+                        <div class="quiz-options">
+                            <button class="quiz-btn" onclick="startQuiz('math', 'traditional', 10)">
+                                Traditional (${mathTraditional})
+                            </button>
+                            ${mathGridIn > 0 ? `
+                                <button class="quiz-btn" onclick="startQuiz('math', 'grid-in', 10)">
+                                    Grid-In (${mathGridIn})
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                    <div class="subject-card">
+                        <div class="card-icon">📚</div>
+                        <div class="card-title">Reading</div>
+                        <div class="card-count">${readingQuery.size} questions available</div>
+                        <div class="quiz-options">
+                            <button class="quiz-btn" onclick="startQuiz('reading', 'traditional', 10)">
+                                Start Quiz
+                            </button>
+                        </div>
+                    </div>
+                    <div class="subject-card">
+                        <div class="card-icon">✍️</div>
+                        <div class="card-title">Writing</div>
+                        <div class="card-count">${writingQuery.size} questions available</div>
+                        <div class="quiz-options">
+                            <button class="quiz-btn" onclick="startQuiz('writing', 'traditional', 10)">
+                                Start Quiz
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading subjects:', error);
+                subjectGrid.innerHTML = '<p style="color: red;">Error loading questions. Please refresh.</p>';
+            }
+        }
+
+        // Start Quiz
+        async function startQuiz(subject, format, questionCount = 10) {
+            currentSubject = subject;
+            currentFormat = format;
+            
+            // Set quiz title
+            const title = `${subject.charAt(0).toUpperCase() + subject.slice(1)} - ${format === 'grid-in' ? 'Grid-In' : 'Traditional'}`;
+            document.getElementById('quizTitle').textContent = title;
+            
+            // Load questions
+            try {
+                let query = db.collection('satQuestions')
+                    .where('subject', '==', subject)
+                    .where('sourceTag', '==', 'SAT_World');
+                
+                if (format && subject === 'math') {
+                    query = query.where('format', '==', format);
+                }
+                
+                const snapshot = await query.limit(questionCount).get();
+                
+                currentQuiz = [];
+                snapshot.forEach(doc => {
+                    currentQuiz.push({ id: doc.id, ...doc.data() });
+                });
+
+                if (currentQuiz.length === 0) {
+                    alert('No questions found for this category.');
+                    return;
+                }
+
+                // Shuffle questions for variety
+                currentQuiz.sort(() => Math.random() - 0.5);
+                
+                // Initialize quiz
+                currentQuestionIndex = 0;
+                userAnswers = new Array(currentQuiz.length).fill(null);
+                quizStartTime = new Date();
+                
+                showQuiz();
+                displayQuestion();
+                
+            } catch (error) {
+                console.error('Error loading quiz:', error);
+                alert('Error loading quiz. Please try again.');
+            }
+        }
+
+        // Display current question
+        function displayQuestion() {
+            const question = currentQuiz[currentQuestionIndex];
+            const questionContent = document.getElementById('questionContent');
+            
+            // Update counter and progress
+            document.getElementById('questionCounter').textContent = 
+                `Question ${currentQuestionIndex + 1} of ${currentQuiz.length}`;
+            document.getElementById('progressBar').style.width = 
+                `${((currentQuestionIndex + 1) / currentQuiz.length) * 100}%`;
+            
+            // Build question HTML
+            let html = `<div class="question-text">${question.question}</div>`;
+            
+            if (question.format === 'traditional' && question.options) {
+                html += '<div class="options-container">';
+                const letters = ['A', 'B', 'C', 'D'];
+                question.options.forEach((option, index) => {
+                    const isSelected = userAnswers[currentQuestionIndex] === index;
+                    html += `
+                        <div class="option ${isSelected ? 'selected' : ''}" onclick="selectOption(${index})">
+                            <div class="option-letter">${letters[index]}</div>
+                            <div>${option}</div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            } else if (question.format === 'grid-in') {
+                html += `
+                    <div class="grid-in-container">
+                        <p>Enter your answer:</p>
+                        <input type="text" 
+                               class="grid-in-input" 
+                               id="gridInAnswer" 
+                               placeholder="Your answer"
+                               value="${userAnswers[currentQuestionIndex] || ''}"
+                               onchange="saveGridInAnswer()">
+                    </div>
+                `;
+            }
+            
+            questionContent.innerHTML = html;
+            
+            // Update navigation buttons
+            document.getElementById('prevBtn').style.display = 
+                currentQuestionIndex === 0 ? 'none' : 'inline-block';
+            document.getElementById('nextBtn').style.display = 
+                currentQuestionIndex === currentQuiz.length - 1 ? 'none' : 'inline-block';
+            document.getElementById('submitBtn').style.display = 
+                currentQuestionIndex === currentQuiz.length - 1 ? 'inline-block' : 'none';
+        }
+
+        // Select option for multiple choice
+        function selectOption(index) {
+            userAnswers[currentQuestionIndex] = index;
+            displayQuestion(); // Refresh to show selection
+        }
+
+        // Save grid-in answer
+        function saveGridInAnswer() {
+            const answer = document.getElementById('gridInAnswer').value;
+            userAnswers[currentQuestionIndex] = answer;
+        }
+
+        // Navigation functions
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                displayQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < currentQuiz.length - 1) {
+                currentQuestionIndex++;
+                displayQuestion();
+            }
+        }
+
+        function skipQuestion() {
+            userAnswers[currentQuestionIndex] = null;
+            if (currentQuestionIndex < currentQuiz.length - 1) {
+                nextQuestion();
+            } else {
+                submitQuiz();
+            }
+        }
+
+        // Submit quiz
+        async function submitQuiz() {
+            const endTime = new Date();
+            const timeSpent = Math.floor((endTime - quizStartTime) / 1000);
+            
+            // Calculate score
+            let correct = 0;
+            let incorrect = 0;
+            let skipped = 0;
+            
+            currentQuiz.forEach((question, index) => {
+                if (userAnswers[index] === null) {
+                    skipped++;
+                } else if (question.format === 'traditional') {
+                    if (userAnswers[index] === question.correct) {
+                        correct++;
+                    } else {
+                        incorrect++;
+                    }
+                } else if (question.format === 'grid-in') {
+                    if (String(userAnswers[index]) === String(question.answer)) {
+                        correct++;
+                    } else {
+                        incorrect++;
+                    }
+                }
+            });
+            
+            const score = Math.round((correct / currentQuiz.length) * 100);
+            
+            // Save results to Firestore
+            try {
+                await db.collection('quizResults').add({
+                    userId: currentUser.uid,
+                    userEmail: currentUser.email,
+                    userName: currentUser.displayName,
+                    subject: currentSubject,
+                    format: currentFormat,
+                    score: score,
+                    correct: correct,
+                    incorrect: incorrect,
+                    skipped: skipped,
+                    total: currentQuiz.length,
+                    timeSpent: timeSpent,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    sourceTag: 'SAT_World'
+                });
+            } catch (error) {
+                console.error('Error saving results:', error);
+            }
+            
+            // Display results
+            displayResults(correct, incorrect, skipped, score, timeSpent);
+        }
+
+        // Display results
+        function displayResults(correct, incorrect, skipped, score, timeSpent) {
+            document.getElementById('scoreCircle').textContent = `${score}%`;
+            document.getElementById('correctCount').textContent = correct;
+            document.getElementById('incorrectCount').textContent = incorrect;
+            document.getElementById('skippedCount').textContent = skipped;
+            
+            const minutes = Math.floor(timeSpent / 60);
+            const seconds = timeSpent % 60;
+            document.getElementById('timeSpent').textContent = 
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Set result message
+            let message = '';
+            if (score >= 90) message = 'Outstanding! 🌟';
+            else if (score >= 80) message = 'Great job! 🎉';
+            else if (score >= 70) message = 'Good work! 👍';
+            else if (score >= 60) message = 'Nice effort! 📚';
+            else message = 'Keep practicing! 💪';
+            document.getElementById('resultMessage').textContent = message;
+            
+            // Show review
+            displayReview();
+            
+            showResults();
+        }
+
+        // Display review of answers
+        function displayReview() {
+            const reviewContainer = document.getElementById('reviewQuestions');
+            let html = '';
+            
+            currentQuiz.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                let isCorrect = false;
+                let correctAnswer = '';
+                
+                if (question.format === 'traditional') {
+                    isCorrect = userAnswer === question.correct;
+                    correctAnswer = question.options[question.correct];
+                } else {
+                    isCorrect = String(userAnswer) === String(question.answer);
+                    correctAnswer = question.answer;
+                }
+                
+                html += `
+                    <div class="review-question ${isCorrect ? 'correct' : 'incorrect'}">
+                        <strong>Q${index + 1}:</strong> ${question.question.substring(0, 100)}...<br>
+                        <strong>Your Answer:</strong> ${userAnswer !== null ? 
+                            (question.format === 'traditional' ? question.options[userAnswer] : userAnswer) : 
+                            'Skipped'}<br>
+                        <strong>Correct Answer:</strong> ${correctAnswer}<br>
+                        ${!isCorrect && question.explanation ? 
+                            `<strong>Explanation:</strong> ${question.explanation}` : ''}
+                    </div>
+                `;
+            });
+            
+            reviewContainer.innerHTML = html;
+        }
+
+        // Back to dashboard
+        function backToDashboard() {
+            showDashboard();
+        }
+
+        // Retake quiz
+        function retakeQuiz() {
+            startQuiz(currentSubject, currentFormat);
+        }
+
+        // Auth state observer
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                currentUser = user;
+                showDashboard();
+            } else {
+                showSignInScreen();
+            }
+        });
+
+        // Update time every minute
+        setInterval(updateDashboardTime, 60000);
+    </script>
+</body>
+</html>
