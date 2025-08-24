@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAT Platform - Question Counter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .status {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .status-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+        }
+
+        .success {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .question-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .question-item {
+            padding: 8px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #e9ecef;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 SAT Platform Question Counter</h1>
+        
+        <div id="status" class="status">
+            <div class="loading">🔄 Connecting to Firebase...</div>
+        </div>
+
+        <button id="checkBtn" class="btn" style="display: none;">Check Questions</button>
+
+        <div id="questionList" class="question-list" style="display: none;">
+            <h3>Questions by Type:</h3>
+            <div id="questionDetails"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAv4Z5vAl8knY9RNs_U5VFObU3WKJGuxqg",
+            authDomain: "sat-education-platform.firebaseapp.com",
+            projectId: "sat-education-platform",
+            storageBucket: "sat-education-platform.appspot.com",
+            messagingSenderId: "135365605707",
+            appId: "1:135365605707:web:17e2a91f0db00c4f6259e5"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const statusDiv = document.getElementById('status');
+        const checkBtn = document.getElementById('checkBtn');
+        const questionList = document.getElementById('questionList');
+        const questionDetails = document.getElementById('questionDetails');
+
+        async function checkQuestions() {
+            statusDiv.innerHTML = '<div class="loading">🔍 Checking questions in database...</div>';
+            
+            try {
+                // Check satQuestions collection
+                const snapshot = await db.collection('satQuestions').get();
+                const questions = [];
+                
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    questions.push({
+                        id: doc.id,
+                        type: data.type || 'Unknown',
+                        difficulty: data.difficulty || 'Unknown',
+                        sourceTag: data.sourceTag || 'Unknown',
+                        question: data.question ? data.question.substring(0, 50) + '...' : 'No question text'
+                    });
+                });
+
+                // Count by type
+                const counts = {
+                    Math: 0,
+                    Reading: 0,
+                    Writing: 0,
+                    Unknown: 0
+                };
+
+                // Count by source tag
+                const sourceTags = {};
+
+                questions.forEach(q => {
+                    counts[q.type] = (counts[q.type] || 0) + 1;
+                    sourceTags[q.sourceTag] = (sourceTags[q.sourceTag] || 0) + 1;
+                });
+
+                // Display results
+                let statusHTML = `
+                    <div class="status-item">
+                        <span>Total Questions:</span>
+                        <span class="success">${questions.length}</span>
+                    </div>
+                `;
+
+                // Display by type
+                Object.keys(counts).forEach(type => {
+                    if (counts[type] > 0) {
+                        statusHTML += `
+                            <div class="status-item">
+                                <span>${type}:</span>
+                                <span class="success">${counts[type]}</span>
+                            </div>
+                        `;
+                    }
+                });
+
+                statusDiv.innerHTML = statusHTML;
+
+                // Display source tags
+                let detailsHTML = '<h4>Source Tags:</h4>';
+                Object.keys(sourceTags).forEach(tag => {
+                    detailsHTML += `
+                        <div class="question-item">
+                            <span>${tag}:</span>
+                            <span class="tag">${sourceTags[tag]} questions</span>
+                        </div>
+                    `;
+                });
+
+                // Show first few questions as sample
+                detailsHTML += '<h4 style="margin-top: 20px;">Sample Questions:</h4>';
+                questions.slice(0, 5).forEach(q => {
+                    detailsHTML += `
+                        <div class="question-item">
+                            <strong>${q.type}</strong> - ${q.question}
+                            <span class="tag">${q.sourceTag}</span>
+                        </div>
+                    `;
+                });
+
+                questionDetails.innerHTML = detailsHTML;
+                questionList.style.display = 'block';
+
+                // Add collection check info
+                statusHTML += `
+                    <div class="status-item" style="margin-top: 20px; background: #fff3cd; color: #856404;">
+                        <span>Collection:</span>
+                        <span>satQuestions ✓</span>
+                    </div>
+                `;
+                statusDiv.innerHTML = statusHTML;
+
+            } catch (error) {
+                statusDiv.innerHTML = `
+                    <div class="error">❌ Error: ${error.message}</div>
+                    <div style="margin-top: 10px; padding: 10px; background: #f8d7da; border-radius: 5px;">
+                        <strong>Troubleshooting:</strong><br>
+                        1. Check if Firestore is enabled in Firebase Console<br>
+                        2. Verify collection name is "satQuestions"<br>
+                        3. Check Firebase rules allow read access
+                    </div>
+                `;
+            }
+        }
+
+        // Auto-check on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                checkQuestions();
+                checkBtn.style.display = 'block';
+            }, 1000);
+        });
+
+        checkBtn.addEventListener('click', checkQuestions);
+    </script>
+</body>
+</html>
