@@ -138,7 +138,8 @@
         </div>
 
         <div class="config-section">
-            <h2>📝 Step 2: Paste Your Firebase Config Here</h2>
+            <h2>📝 Step 2: Test Your Configuration</h2>
+            <p><strong>The config below is pre-filled with your CORRECT settings:</strong></p>
             <textarea id="configInput" class="config-input" rows="12" placeholder="Paste your Firebase config object here...">
 const firebaseConfig = {
     apiKey: "AIzaSyAv4Z5vAl8knY9RNs_U5VFObU3WKJGuxqg",
@@ -150,6 +151,10 @@ const firebaseConfig = {
 };</textarea>
             <button onclick="testConfig()">🔍 Test Configuration</button>
             <button onclick="useKnownConfig()">📋 Use Known Config</button>
+            <button onclick="directTest()" style="background: #10b981;">✅ Direct Test (Skip Parsing)</button>
+            <div class="warning" style="margin-top: 10px;">
+                <strong>Getting parsing errors?</strong> Click the green "Direct Test" button to bypass parsing and test immediately!
+            </div>
         </div>
 
         <div id="resultSection" class="result-section" style="display: none;">
@@ -267,25 +272,80 @@ const firebaseConfig = {
             alert('Known configuration loaded. Click "Test Configuration" to verify.');
         }
 
+        // Direct test with hardcoded config (no parsing)
+        function directTest() {
+            try {
+                // Use the correct config directly
+                const config = {
+                    apiKey: "AIzaSyAv4Z5vAl8knY9RNs_U5VFObU3WKJGuxqg",
+                    authDomain: "sat-education-platform.firebaseapp.com",
+                    projectId: "sat-education-platform",
+                    storageBucket: "sat-education-platform.appspot.com",
+                    messagingSenderId: "296721018166",
+                    appId: "1:296721018166:web:5e96a5e3e37e4fd85c04ae"
+                };
+                
+                if (app) {
+                    app.delete();
+                }
+                app = firebase.initializeApp(config);
+                auth = firebase.auth();
+                db = firebase.firestore();
+                
+                showResult('success', '✅ Firebase initialized with correct config! Testing authentication...');
+                
+                // Immediately try to sign in
+                const provider = new firebase.auth.GoogleAuthProvider();
+                auth.signInWithPopup(provider)
+                    .then(result => {
+                        showResult('success', `✅ SUCCESS! Signed in as: ${result.user.email}<br><br>
+                            <strong>Everything is working!</strong> Now update all your files with this API key:<br>
+                            <code>AIzaSyAv4Z5vAl8knY9RNs_U5VFObU3WKJGuxqg</code>`);
+                    })
+                    .catch(error => {
+                        showResult('error', `Sign-in failed: ${error.code}<br>${error.message}<br><br>
+                            <strong>Check:</strong><br>
+                            1. Is Google auth enabled in Firebase Console?<br>
+                            2. Is your domain authorized?<br>
+                            3. Are popups blocked?`);
+                    });
+                    
+            } catch (error) {
+                showResult('error', `Direct test failed: ${error.message}`);
+            }
+        }
+
         // Test the configuration
         function testConfig() {
             const configText = document.getElementById('configInput').value;
             
             try {
-                // Extract config object from text
-                const configMatch = configText.match(/\{[\s\S]*\}/);
-                if (!configMatch) {
-                    showResult('error', 'Invalid configuration format. Please paste the complete config object.');
+                let config;
+                
+                // Check if it's JavaScript format (const firebaseConfig = {...})
+                if (configText.includes('const firebaseConfig') || configText.includes('=')) {
+                    // Extract the object part from JavaScript syntax
+                    const match = configText.match(/=\s*(\{[\s\S]*?\})\s*;?\s*$/);
+                    if (match) {
+                        // Parse the extracted object
+                        const configStr = match[1]
+                            .replace(/(\w+):/g, '"$1":')  // Add quotes to keys
+                            .replace(/'/g, '"')            // Replace single quotes
+                            .replace(/,\s*}/, '}')         // Remove trailing comma
+                            .replace(/\s+/g, ' ');         // Normalize whitespace
+                        
+                        config = JSON.parse(configStr);
+                    } else {
+                        showResult('error', 'Could not extract config object. Make sure format is: const firebaseConfig = {...}');
+                        return;
+                    }
+                } else if (configText.trim().startsWith('{')) {
+                    // It's already JSON format
+                    config = JSON.parse(configText);
+                } else {
+                    showResult('error', 'Invalid format. Paste either JavaScript (const firebaseConfig = {...}) or JSON ({...})');
                     return;
                 }
-                
-                // Parse the config
-                const configStr = configMatch[0]
-                    .replace(/(\w+):/g, '"$1":')  // Add quotes to keys
-                    .replace(/'/g, '"')            // Replace single quotes with double
-                    .replace(/,\s*}/, '}');        // Remove trailing comma
-                
-                const config = JSON.parse(configStr);
                 
                 // Validate required fields
                 const requiredFields = ['apiKey', 'authDomain', 'projectId'];
@@ -305,7 +365,7 @@ const firebaseConfig = {
                     auth = firebase.auth();
                     db = firebase.firestore();
                     
-                    showResult('success', 'Configuration is valid! Firebase initialized successfully.');
+                    showResult('success', '✅ Configuration is valid! Firebase initialized successfully.');
                     
                     // Show additional info
                     const info = `
@@ -313,7 +373,11 @@ const firebaseConfig = {
                             <strong>Config Details:</strong><br>
                             Project ID: ${config.projectId}<br>
                             Auth Domain: ${config.authDomain}<br>
-                            API Key: ${config.apiKey.substring(0, 10)}...
+                            API Key: ${config.apiKey.substring(0, 10)}...<br>
+                            <br>
+                            <button onclick="testAuthSetup()" style="background: #10b981; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+                                🔐 Test Sign In Now
+                            </button>
                         </div>
                     `;
                     document.getElementById('testResults').innerHTML += info;
@@ -323,7 +387,8 @@ const firebaseConfig = {
                 }
                 
             } catch (error) {
-                showResult('error', `Configuration parsing failed: ${error.message}`);
+                showResult('error', `Configuration parsing failed: ${error.message}<br><br>
+                    <strong>Tip:</strong> Click "Use Known Config" button to load the correct configuration automatically.`);
             }
         }
 
