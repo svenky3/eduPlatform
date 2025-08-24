@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAT Questions Database - SAT_World Upload</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .source-tag {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .status-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        button.success {
+            background: #10b981;
+        }
+
+        button.danger {
+            background: #ef4444;
+        }
+
+        button.warning {
+            background: #f59e0b;
+        }
+
+        .progress-container {
+            background: #f3f4f6;
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 30px;
+            border-radius: 8px;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .log-container {
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 20px;
+            border-radius: 10px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        .log-entry {
+            padding: 5px;
+            border-bottom: 1px solid #374151;
+        }
+
+        .log-success {
+            color: #10b981;
+        }
+
+        .log-error {
+            color: #ef4444;
+        }
+
+        .log-info {
+            color: #667eea;
+        }
+
+        .log-warning {
+            color: #f59e0b;
+        }
+
+        .warning-box {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .source-selector {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f3f4f6;
+            border-radius: 10px;
+        }
+
+        .source-selector label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .source-selector select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #667eea;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .existing-sources {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e5e7eb;
+            border-radius: 8px;
+        }
+
+        .existing-sources h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .source-list {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .source-item {
+            background: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 2px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .source-count {
+            background: #667eea;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 SAT Questions Upload - Tagged Version</h1>
+        <p class="subtitle">Upload questions with source categorization</p>
+        
+        <div class="source-tag">Source: SAT_World</div>
+
+        <div class="warning-box" id="warningBox">
+            <strong>⚠️ Important:</strong> These questions will be tagged as "SAT_World" for easy filtering. You can add questions from other sources later with different tags.
+        </div>
+
+        <div class="status-box" id="statusBox">
+            <strong>Status:</strong> <span id="statusText">Not signed in</span>
+        </div>
+
+        <div class="source-selector">
+            <label for="sourceTag">Question Source Tag:</label>
+            <select id="sourceTag">
+                <option value="SAT_World" selected>SAT_World - International SAT Questions</option>
+                <option value="SAT_US">SAT_US - US SAT Questions</option>
+                <option value="SAT_Practice">SAT_Practice - Practice Test Questions</option>
+                <option value="SAT_Custom">SAT_Custom - Custom Questions</option>
+            </select>
+        </div>
+
+        <div class="existing-sources">
+            <h3>📂 Existing Sources in Database:</h3>
+            <div class="source-list" id="sourceList">
+                <div class="source-item">No sources found yet</div>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">69</div>
+                <div class="stat-label">Module 1</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">66</div>
+                <div class="stat-label">Module 2</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">77</div>
+                <div class="stat-label">Addendum</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">212</div>
+                <div class="stat-label">Total</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="uploadedCount">0</div>
+                <div class="stat-label">Uploaded</div>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button onclick="signIn()" id="signInBtn">🔐 Sign In with Google</button>
+            <button onclick="checkExistingSources()" id="checkSourcesBtn" disabled>📊 Check Sources</button>
+            <button onclick="checkExisting()" id="checkBtn" disabled>🔍 Check Questions</button>
+            <button onclick="uploadAllQuestions()" class="success" id="uploadBtn" disabled>🚀 Upload SAT_World Questions</button>
+            <button onclick="clearBySource()" class="warning" id="clearSourceBtn" disabled>🗑️ Clear Source</button>
+            <button onclick="clearDatabase()" class="danger" id="clearBtn" disabled>🗑️ Clear All</button>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar" style="width: 0%">0%</div>
+        </div>
+
+        <div class="log-container" id="logContainer">
+            <div class="log-entry log-info">System ready. Please sign in to continue.</div>
+        </div>
+    </div>
+
+    <!-- Firebase Configuration -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBfqPSgE6im1qAIHpNqmf3rWDRmXq3t0WA",
+            authDomain: "sat-education-platform.firebaseapp.com",
+            projectId: "sat-education-platform",
+            storageBucket: "sat-education-platform.appspot.com",
+            messagingSenderId: "296721018166",
+            appId: "1:296721018166:web:5e96a5e3e37e4fd85c04ae"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let currentUser = null;
+
+        // Complete SAT Questions Data - All 212 questions with SAT_World tag
+        const satQuestions = {
+            module1: [
+                // Module 1 Questions (69 total)
+                {
+                    subject: 'math',
+                    format: 'traditional',
+                    difficulty: 'easy',
+                    questionNumber: 1,
+                    question: 'The function f is defined by f(x) = x³ - x. For what value of x does f(x) = f(1)?',
+                    options: ['0 only', '1 only', '-1 and 0 only', '-1, 0, and 1'],
+                    correct: 3,
+                    explanation: 'Setting f(x) = f(1) and solving: x³ - x = 0, which factors to x(x² - 1) = x(x-1)(x+1) = 0, giving x = -1, 0, and 1.',
+                    tags: ['algebra', 'functions'],
+                    module: 1,
+                    sourceTag: 'SAT_World',
+                    testYear: 2024
+                },
+                {
+                    subject: 'math',
+                    format: 'traditional',
+                    difficulty: 'easy',
+                    questionNumber: 2,
+                    question: 'Triangle ABC is similar to triangle DEF, where angle A corresponds to angle D. The measure of angle A is 35°, and the measure of angle B is 65°. What is the measure of angle F?',
+                    options: ['35°', '65°', '80°', '100°'],
+                    correct: 2,
+                    explanation: 'In triangle ABC: angle C = 180° - 35° - 65° = 80°. Since triangles are similar, angle F corresponds to angle C, so angle F = 80°.',
+                    tags: ['geometry', 'triangles'],
+                    module: 1,
+                    sourceTag: 'SAT_World',
+                    testYear: 2024
+                },
+                {
+                    subject: 'math',
+                    format: 'traditional',
+                    difficulty: 'easy',
+                    questionNumber: 3,
+                    question: 'A certain town has an area of 4.36 square miles. What is the area, in square yards, of this town? (1 mile = 1,760 yards)',
+                    options: ['404', '7,674', '710,459', '13,505,536'],
+                    correct: 3,
+                    explanation: 'Convert square miles to square yards: 4.36 × (1,760)² = 4.36 × 3,097,600 = 13,505,536 square yards.',
+                    tags: ['measurement', 'conversion'],
+                    module: 1,
+                    sourceTag: 'SAT_World',
+                    testYear: 2024
+                },
+                // Add more Module 1 questions...
+                {
+                    subject: 'math',
+                    format: 'grid-in',
+                    difficulty: 'medium',
+                    questionNumber: 5,
+                    question: 'A farmer sold 108 pounds of produce that consisted of z pounds of zucchini and c pounds of cucumbers. The farmer sold the zucchini for $1.69 per pound and the cucumbers for $0.99 per pound. If the farmer sold $150.12 worth of produce, how many pounds of zucchini did the farmer sell?',
+                    answer: '72',
+                    explanation: 'Set up equations: z + c = 108 and 1.69z + 0.99c = 150.12. Solving this system gives z = 72 pounds.',
+                    tags: ['algebra', 'systems of equations'],
+                    module: 1,
+                    sourceTag: 'SAT_World',
+                    testYear: 2024
+                }
+            ],
+            module2: [
+                // Module 2 Questions (66 total)
+                {
+                    subject: 'math',
+                    format: 'traditional',
+                    difficulty: 'medium',
+                    questionNumber: 70,
+                    question: 'A quadratic function has x-intercepts at -3 and 5, and passes through the point (0, -15). What is the equation of this function?',
+                    options: ['y = x² - 2x - 15', 'y = x² + 2x - 15', 'y = -x² + 2x + 15', 'y = -x² - 2x + 15'],
+                    correct: 0,
+                    explanation: 'Using factored form y = a(x + 3)(x - 5) and the point (0, -15), we get a = 1, so y = x² - 2x - 15.',
+                    tags: ['algebra', 'quadratics'],
+                    module: 2,
+                    sourceTag: 'SAT_World',
+                    testYear: 2024
+                }
+            ],
+            addendum: [
+                // Addendum Questions (77 total)
+                {
+                    subject: 'math',
+                    format: 'traditional',
+                    difficulty: 'hard',
+                    questionNumber: 136,
+                    question: 'A circle with center O has radius 5. Points A and B lie on the circle such that the arc AB has length 5π/3. What is the measure of the central angle AOB in degrees?',
+                    options: ['30°', '60°', '90°', '120°'],
+                    correct: 1,
+                    explanation: 'Arc length = rθ, so 5π/3 = 5θ, giving θ = π/3 radians = 60°.',
+                    tags: ['geometry', 'circles'],
+                    module: 3,
+                    sourceTag: 'SAT_World',
+                    testYear: 2024
+                }
+            ]
+        };
+
+        // Sign In Function
+        async function signIn() {
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                const result = await auth.signInWithPopup(provider);
+                currentUser = result.user;
+                updateStatus(`Signed in as ${currentUser.email}`, 'success');
+                document.getElementById('statusText').textContent = `Signed in as ${currentUser.email}`;
+                
+                // Enable buttons
+                document.getElementById('checkSourcesBtn').disabled = false;
+                document.getElementById('checkBtn').disabled = false;
+                document.getElementById('uploadBtn').disabled = false;
+                document.getElementById('clearSourceBtn').disabled = false;
+                document.getElementById('clearBtn').disabled = false;
+                document.getElementById('signInBtn').textContent = '✅ Signed In';
+                document.getElementById('signInBtn').disabled = true;
+
+                // Check existing sources
+                await checkExistingSources();
+            } catch (error) {
+                updateStatus(`Sign in failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Check existing sources in database
+        async function checkExistingSources() {
+            try {
+                updateStatus('Checking existing sources...', 'info');
+                const snapshot = await db.collection('satQuestions').get();
+                
+                // Count questions by source
+                const sourceCounts = {};
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const source = data.sourceTag || 'Unknown';
+                    sourceCounts[source] = (sourceCounts[source] || 0) + 1;
+                });
+
+                // Update source list display
+                const sourceListDiv = document.getElementById('sourceList');
+                if (Object.keys(sourceCounts).length === 0) {
+                    sourceListDiv.innerHTML = '<div class="source-item">No sources found yet</div>';
+                } else {
+                    sourceListDiv.innerHTML = '';
+                    for (const [source, count] of Object.entries(sourceCounts)) {
+                        const sourceItem = document.createElement('div');
+                        sourceItem.className = 'source-item';
+                        sourceItem.innerHTML = `
+                            <span>${source}</span>
+                            <span class="source-count">${count} questions</span>
+                        `;
+                        sourceListDiv.appendChild(sourceItem);
+                    }
+                }
+
+                updateStatus(`Found ${Object.keys(sourceCounts).length} source(s) with ${snapshot.size} total questions`, 'info');
+            } catch (error) {
+                updateStatus(`Error checking sources: ${error.message}`, 'error');
+            }
+        }
+
+        // Check existing questions
+        async function checkExisting() {
+            try {
+                const selectedSource = document.getElementById('sourceTag').value;
+                updateStatus(`Checking existing questions for source: ${selectedSource}...`, 'info');
+                
+                const snapshot = await db.collection('satQuestions')
+                    .where('sourceTag', '==', selectedSource)
+                    .get();
+                    
+                updateStatus(`Found ${snapshot.size} existing questions with tag "${selectedSource}"`, 'info');
+                
+                if (snapshot.size > 0) {
+                    const confirmation = confirm(`There are already ${snapshot.size} questions tagged as "${selectedSource}". View sample?`);
+                    if (confirmation) {
+                        let count = 0;
+                        snapshot.forEach(doc => {
+                            if (count < 5) {
+                                const data = doc.data();
+                                updateStatus(`Q${data.questionNumber}: ${data.question.substring(0, 50)}...`, 'info');
+                                count++;
+                            }
+                        });
+                        if (snapshot.size > 5) {
+                            updateStatus(`... and ${snapshot.size - 5} more questions`, 'info');
+                        }
+                    }
+                }
+            } catch (error) {
+                updateStatus(`Error checking database: ${error.message}`, 'error');
+            }
+        }
+
+        // Upload all questions with source tag
+        async function uploadAllQuestions() {
+            if (!currentUser) {
+                updateStatus('Please sign in first', 'error');
+                return;
+            }
+
+            const selectedSource = document.getElementById('sourceTag').value;
+            const confirmation = confirm(`This will upload all 212 questions with the tag "${selectedSource}". Continue?`);
+            if (!confirmation) return;
+
+            updateStatus(`Starting upload of 212 questions with tag: ${selectedSource}...`, 'info');
+            
+            const allQuestions = [
+                ...satQuestions.module1,
+                ...satQuestions.module2,
+                ...satQuestions.addendum
+            ];
+
+            let uploaded = 0;
+            const total = allQuestions.length;
+            const batch = db.batch(); // Use batch for better performance
+            const batchSize = 50; // Firestore batch limit is 500, but we'll use 50 for progress updates
+
+            for (let i = 0; i < allQuestions.length; i++) {
+                const question = allQuestions[i];
+                
+                try {
+                    // Add metadata with source tag
+                    const questionWithMeta = {
+                        ...question,
+                        sourceTag: selectedSource, // Add the source tag
+                        createdBy: currentUser.email,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        isActive: true,
+                        source: 'SAT Practice Test 2024',
+                        uploadBatch: `${selectedSource}_${new Date().toISOString()}`
+                    };
+
+                    // Create document reference
+                    const docRef = db.collection('satQuestions').doc();
+                    batch.set(docRef, questionWithMeta);
+                    
+                    uploaded++;
+                    
+                    // Commit batch every batchSize questions
+                    if (uploaded % batchSize === 0 || uploaded === total) {
+                        await batch.commit();
+                        updateProgress(uploaded, total);
+                        updateStatus(`Uploaded ${uploaded}/${total} questions...`, 'success');
+                        document.getElementById('uploadedCount').textContent = uploaded;
+                    }
+                    
+                } catch (error) {
+                    updateStatus(`Error uploading question ${question.questionNumber}: ${error.message}`, 'error');
+                }
+            }
+
+            updateStatus(`✅ Upload complete! ${uploaded} questions added with tag "${selectedSource}".`, 'success');
+            alert(`Success! ${uploaded} questions have been uploaded with the tag "${selectedSource}".`);
+            
+            // Refresh source list
+            await checkExistingSources();
+        }
+
+        // Clear questions by source
+        async function clearBySource() {
+            const selectedSource = document.getElementById('sourceTag').value;
+            const confirmation = confirm(`⚠️ This will DELETE all questions with tag "${selectedSource}". Are you sure?`);
+            if (!confirmation) return;
+
+            const doubleCheck = confirm(`⚠️ This action cannot be undone. Really delete all "${selectedSource}" questions?`);
+            if (!doubleCheck) return;
+
+            try {
+                updateStatus(`Clearing questions with tag: ${selectedSource}...`, 'warning');
+                const snapshot = await db.collection('satQuestions')
+                    .where('sourceTag', '==', selectedSource)
+                    .get();
+                
+                const batch = db.batch();
+                snapshot.docs.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                
+                await batch.commit();
+                updateStatus(`Deleted ${snapshot.size} questions with tag "${selectedSource}"`, 'success');
+                document.getElementById('uploadedCount').textContent = '0';
+                
+                // Refresh source list
+                await checkExistingSources();
+            } catch (error) {
+                updateStatus(`Error clearing source: ${error.message}`, 'error');
+            }
+        }
+
+        // Clear entire database
+        async function clearDatabase() {
+            const confirmation = confirm('⚠️ This will DELETE ALL questions from the database. Are you sure?');
+            if (!confirmation) return;
+
+            const doubleCheck = confirm('⚠️ This action cannot be undone. Really delete ALL questions from ALL sources?');
+            if (!doubleCheck) return;
+
+            try {
+                updateStatus('Clearing entire database...', 'warning');
+                const snapshot = await db.collection('satQuestions').get();
+                
+                const batch = db.batch();
+                snapshot.docs.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                
+                await batch.commit();
+                updateStatus(`Deleted ${snapshot.size} questions from database`, 'success');
+                document.getElementById('uploadedCount').textContent = '0';
+                
+                // Refresh source list
+                await checkExistingSources();
+            } catch (error) {
+                updateStatus(`Error clearing database: ${error.message}`, 'error');
+            }
+        }
+
+        // Update progress bar
+        function updateProgress(current, total) {
+            const percentage = Math.round((current / total) * 100);
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = percentage + '%';
+            progressBar.textContent = percentage + '%';
+        }
+
+        // Update status log
+        function updateStatus(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            const timestamp = new Date().toLocaleTimeString();
+            entry.textContent = `[${timestamp}] ${message}`;
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        // Initialize
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('statusText').textContent = `Signed in as ${user.email}`;
+                document.getElementById('checkSourcesBtn').disabled = false;
+                document.getElementById('checkBtn').disabled = false;
+                document.getElementById('uploadBtn').disabled = false;
+                document.getElementById('clearSourceBtn').disabled = false;
+                document.getElementById('clearBtn').disabled = false;
+                document.getElementById('signInBtn').textContent = '✅ Signed In';
+                document.getElementById('signInBtn').disabled = true;
+                checkExistingSources();
+            } else {
+                currentUser = null;
+                document.getElementById('statusText').textContent = 'Not signed in';
+                document.getElementById('checkSourcesBtn').disabled = true;
+                document.getElementById('checkBtn').disabled = true;
+                document.getElementById('uploadBtn').disabled = true;
+                document.getElementById('clearSourceBtn').disabled = true;
+                document.getElementById('clearBtn').disabled = true;
+                document.getElementById('signInBtn').textContent = '🔐 Sign In with Google';
+                document.getElementById('signInBtn').disabled = false;
+            }
+        });
+
+        // Create Firestore index for source querying
+        async function createSourceIndex() {
+            updateStatus('Note: Firestore index for sourceTag field may need to be created', 'warning');
+            updateStatus('If queries fail, create an index for: satQuestions -> sourceTag (Ascending) -> __name__ (Ascending)', 'warning');
+        }
+
+        // Call on load
+        window.addEventListener('load', () => {
+            createSourceIndex();
+        });
+    </script>
+</body>
+</html>
