@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAT Platform Diagnostic Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .diagnostic-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .diagnostic-section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: white;
+            border-radius: 5px;
+            border-left: 4px solid #e5e7eb;
+        }
+
+        .status-item.success {
+            border-left-color: #10b981;
+        }
+
+        .status-item.warning {
+            border-left-color: #f59e0b;
+        }
+
+        .status-item.error {
+            border-left-color: #ef4444;
+        }
+
+        .status-value {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 5px;
+            background: #f3f4f6;
+        }
+
+        .status-value.success {
+            background: #10b981;
+            color: white;
+        }
+
+        .status-value.warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .status-value.error {
+            background: #ef4444;
+            color: white;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .collection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .collection-card {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .collection-card.active {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .collection-count {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 10px 0;
+        }
+
+        .collection-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .question-sample {
+            background: #f3f4f6;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .question-item {
+            background: white;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #667eea;
+        }
+
+        .fix-section {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .fix-section h3 {
+            color: #92400e;
+            margin-bottom: 15px;
+        }
+
+        .log-container {
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 20px;
+            border-radius: 10px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+
+        .log-entry {
+            padding: 5px;
+            border-bottom: 1px solid #374151;
+        }
+
+        .log-success {
+            color: #10b981;
+        }
+
+        .log-error {
+            color: #ef4444;
+        }
+
+        .log-warning {
+            color: #f59e0b;
+        }
+
+        .log-info {
+            color: #60a5fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 SAT Platform Diagnostic Tool</h1>
+        <p class="subtitle">Check your database and fix issues</p>
+
+        <button onclick="signIn()" id="signInBtn">🔐 Sign In with Google</button>
+        <button onclick="runDiagnostic()" id="diagnosticBtn" disabled>🔍 Run Full Diagnostic</button>
+        <button onclick="checkAllCollections()" id="checkBtn" disabled>📊 Check All Collections</button>
+        <button onclick="fixCollectionName()" id="fixBtn" disabled>🔧 Fix Collection Names</button>
+
+        <div class="diagnostic-section">
+            <h2>📊 Database Status</h2>
+            <div class="status-item">
+                <span>Authentication Status</span>
+                <span class="status-value" id="authStatus">Not Signed In</span>
+            </div>
+            <div class="status-item">
+                <span>Total Questions Found</span>
+                <span class="status-value" id="totalQuestions">-</span>
+            </div>
+            <div class="status-item">
+                <span>Collections Found</span>
+                <span class="status-value" id="collectionsFound">-</span>
+            </div>
+        </div>
+
+        <div class="diagnostic-section">
+            <h2>📁 Collections Overview</h2>
+            <div class="collection-grid" id="collectionGrid">
+                <div class="collection-card">
+                    <div class="collection-name">Checking...</div>
+                    <div class="collection-count">-</div>
+                    <div>Please sign in</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="diagnostic-section">
+            <h2>📝 Sample Questions</h2>
+            <div class="question-sample" id="questionSample">
+                <p>Sign in and run diagnostic to see sample questions...</p>
+            </div>
+        </div>
+
+        <div class="fix-section" id="fixSection" style="display: none;">
+            <h3>⚠️ Issues Found</h3>
+            <div id="issuesList"></div>
+            <button onclick="autoFix()" style="background: #10b981; margin-top: 15px;">🔧 Auto-Fix Issues</button>
+        </div>
+
+        <div class="log-container" id="logContainer">
+            <div class="log-entry log-info">Diagnostic tool ready. Please sign in to continue.</div>
+        </div>
+    </div>
+
+    <!-- Firebase Configuration -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBfqPSgE6im1qAIHpNqmf3rWDRmXq3t0WA",
+            authDomain: "sat-education-platform.firebaseapp.com",
+            projectId: "sat-education-platform",
+            storageBucket: "sat-education-platform.appspot.com",
+            messagingSenderId: "296721018166",
+            appId: "1:296721018166:web:5e96a5e3e37e4fd85c04ae"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let currentUser = null;
+        let diagnosticResults = {};
+
+        // Sign In Function
+        async function signIn() {
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                const result = await auth.signInWithPopup(provider);
+                currentUser = result.user;
+                
+                document.getElementById('authStatus').textContent = currentUser.email;
+                document.getElementById('authStatus').className = 'status-value success';
+                
+                document.getElementById('diagnosticBtn').disabled = false;
+                document.getElementById('checkBtn').disabled = false;
+                document.getElementById('fixBtn').disabled = false;
+                document.getElementById('signInBtn').textContent = '✅ Signed In';
+                document.getElementById('signInBtn').disabled = true;
+                
+                updateLog(`Signed in as ${currentUser.email}`, 'success');
+                
+                // Auto-run diagnostic
+                await runDiagnostic();
+            } catch (error) {
+                updateLog(`Sign in failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Run full diagnostic
+        async function runDiagnostic() {
+            updateLog('Starting diagnostic...', 'info');
+            diagnosticResults = {
+                collections: {},
+                issues: [],
+                totalQuestions: 0
+            };
+
+            // Check common collection names
+            const collectionNames = [
+                'satQuestions',
+                'quizQuestions', 
+                'questions',
+                'sat-questions',
+                'quiz-questions'
+            ];
+
+            for (const collName of collectionNames) {
+                try {
+                    updateLog(`Checking collection: ${collName}...`, 'info');
+                    const snapshot = await db.collection(collName).limit(5).get();
+                    
+                    if (!snapshot.empty) {
+                        const fullSnapshot = await db.collection(collName).get();
+                        diagnosticResults.collections[collName] = {
+                            count: fullSnapshot.size,
+                            sample: []
+                        };
+                        
+                        fullSnapshot.docs.slice(0, 3).forEach(doc => {
+                            const data = doc.data();
+                            diagnosticResults.collections[collName].sample.push({
+                                id: doc.id,
+                                question: data.question ? data.question.substring(0, 100) : 'No question text',
+                                subject: data.subject,
+                                format: data.format,
+                                sourceTag: data.sourceTag
+                            });
+                        });
+                        
+                        diagnosticResults.totalQuestions += fullSnapshot.size;
+                        updateLog(`Found ${fullSnapshot.size} questions in ${collName}`, 'success');
+                    } else {
+                        updateLog(`Collection ${collName} is empty or doesn't exist`, 'warning');
+                    }
+                } catch (error) {
+                    updateLog(`Error checking ${collName}: ${error.message}`, 'error');
+                }
+            }
+
+            // Update UI
+            updateDiagnosticDisplay();
+            checkForIssues();
+        }
+
+        // Check all collections in database
+        async function checkAllCollections() {
+            updateLog('Checking all collections in database...', 'info');
+            
+            try {
+                // Note: This is a workaround - Firestore doesn't have a direct way to list collections
+                // We'll check known collection names
+                const knownCollections = [
+                    'satQuestions',
+                    'quizQuestions',
+                    'questions',
+                    'users',
+                    'userProgress',
+                    'quizResults'
+                ];
+                
+                for (const collName of knownCollections) {
+                    const snapshot = await db.collection(collName).limit(1).get();
+                    if (!snapshot.empty) {
+                        const count = (await db.collection(collName).get()).size;
+                        updateLog(`Found collection: ${collName} with ${count} documents`, 'success');
+                    }
+                }
+            } catch (error) {
+                updateLog(`Error checking collections: ${error.message}`, 'error');
+            }
+        }
+
+        // Update diagnostic display
+        function updateDiagnosticDisplay() {
+            // Update totals
+            document.getElementById('totalQuestions').textContent = diagnosticResults.totalQuestions;
+            document.getElementById('totalQuestions').className = diagnosticResults.totalQuestions > 0 ? 'status-value success' : 'status-value error';
+            
+            const collectionCount = Object.keys(diagnosticResults.collections).length;
+            document.getElementById('collectionsFound').textContent = collectionCount;
+            document.getElementById('collectionsFound').className = collectionCount > 0 ? 'status-value success' : 'status-value error';
+            
+            // Update collection grid
+            const gridHtml = Object.entries(diagnosticResults.collections).map(([name, data]) => `
+                <div class="collection-card ${data.count > 0 ? 'active' : ''}">
+                    <div class="collection-name">${name}</div>
+                    <div class="collection-count">${data.count}</div>
+                    <div>questions</div>
+                </div>
+            `).join('');
+            
+            document.getElementById('collectionGrid').innerHTML = gridHtml || '<div class="collection-card"><div class="collection-name">No collections found</div></div>';
+            
+            // Update sample questions
+            let sampleHtml = '';
+            Object.entries(diagnosticResults.collections).forEach(([collName, data]) => {
+                if (data.sample && data.sample.length > 0) {
+                    sampleHtml += `<h4>From ${collName}:</h4>`;
+                    data.sample.forEach(q => {
+                        sampleHtml += `
+                            <div class="question-item">
+                                <strong>Q:</strong> ${q.question}<br>
+                                <small>Subject: ${q.subject || 'N/A'} | Format: ${q.format || 'N/A'} | Source: ${q.sourceTag || 'N/A'}</small>
+                            </div>
+                        `;
+                    });
+                }
+            });
+            
+            document.getElementById('questionSample').innerHTML = sampleHtml || '<p>No questions found in database</p>';
+        }
+
+        // Check for issues
+        function checkForIssues() {
+            diagnosticResults.issues = [];
+            
+            // Issue 1: No questions at all
+            if (diagnosticResults.totalQuestions === 0) {
+                diagnosticResults.issues.push({
+                    type: 'error',
+                    message: 'No questions found in any collection',
+                    fix: 'Upload questions using the uploader tool'
+                });
+            }
+            
+            // Issue 2: Questions in wrong collection
+            if (diagnosticResults.collections['quizQuestions'] && !diagnosticResults.collections['satQuestions']) {
+                diagnosticResults.issues.push({
+                    type: 'warning',
+                    message: 'Questions found in "quizQuestions" but not in "satQuestions"',
+                    fix: 'Your platform might be looking in the wrong collection'
+                });
+            }
+            
+            // Issue 3: Low question count
+            if (diagnosticResults.totalQuestions > 0 && diagnosticResults.totalQuestions < 10) {
+                diagnosticResults.issues.push({
+                    type: 'warning',
+                    message: `Only ${diagnosticResults.totalQuestions} questions found (expecting 212)`,
+                    fix: 'Upload the complete question set'
+                });
+            }
+            
+            // Display issues
+            if (diagnosticResults.issues.length > 0) {
+                document.getElementById('fixSection').style.display = 'block';
+                const issuesHtml = diagnosticResults.issues.map(issue => `
+                    <div class="status-item ${issue.type}">
+                        <span>${issue.message}</span>
+                    </div>
+                    <p style="margin: 10px 0; color: #666;">Fix: ${issue.fix}</p>
+                `).join('');
+                document.getElementById('issuesList').innerHTML = issuesHtml;
+            } else {
+                document.getElementById('fixSection').style.display = 'none';
+                updateLog('✅ No issues found! Your database is properly configured.', 'success');
+            }
+        }
+
+        // Fix collection names
+        async function fixCollectionName() {
+            if (!confirm('This will copy questions from "quizQuestions" to "satQuestions". Continue?')) return;
+            
+            try {
+                updateLog('Starting collection migration...', 'info');
+                
+                // Get all questions from quizQuestions
+                const sourceSnapshot = await db.collection('quizQuestions').get();
+                
+                if (sourceSnapshot.empty) {
+                    updateLog('No questions found in quizQuestions', 'warning');
+                    return;
+                }
+                
+                // Copy to satQuestions
+                let copied = 0;
+                const batch = db.batch();
+                
+                sourceSnapshot.forEach(doc => {
+                    const newDocRef = db.collection('satQuestions').doc();
+                    batch.set(newDocRef, doc.data());
+                    copied++;
+                    
+                    if (copied % 50 === 0) {
+                        batch.commit();
+                        updateLog(`Copied ${copied} questions...`, 'info');
+                    }
+                });
+                
+                await batch.commit();
+                updateLog(`✅ Successfully copied ${copied} questions to satQuestions`, 'success');
+                
+                // Re-run diagnostic
+                await runDiagnostic();
+            } catch (error) {
+                updateLog(`Error fixing collection: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-fix issues
+        async function autoFix() {
+            updateLog('Attempting auto-fix...', 'info');
+            
+            for (const issue of diagnosticResults.issues) {
+                if (issue.message.includes('wrong collection')) {
+                    await fixCollectionName();
+                } else if (issue.message.includes('No questions found')) {
+                    updateLog('Please use the uploader tool to add questions', 'warning');
+                    if (confirm('Open the uploader tool in a new tab?')) {
+                        window.open('sat-uploader-tagged.html', '_blank');
+                    }
+                } else if (issue.message.includes('Only')) {
+                    updateLog('Please upload the complete 212 question set', 'warning');
+                    if (confirm('Open the uploader tool in a new tab?')) {
+                        window.open('sat-uploader-tagged.html', '_blank');
+                    }
+                }
+            }
+        }
+
+        // Update log
+        function updateLog(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            const timestamp = new Date().toLocaleTimeString();
+            entry.textContent = `[${timestamp}] ${message}`;
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        // Auth state listener
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('authStatus').textContent = user.email;
+                document.getElementById('authStatus').className = 'status-value success';
+                document.getElementById('diagnosticBtn').disabled = false;
+                document.getElementById('checkBtn').disabled = false;
+                document.getElementById('fixBtn').disabled = false;
+                document.getElementById('signInBtn').textContent = '✅ Signed In';
+                document.getElementById('signInBtn').disabled = true;
+            } else {
+                currentUser = null;
+                document.getElementById('authStatus').textContent = 'Not Signed In';
+                document.getElementById('authStatus').className = 'status-value error';
+                document.getElementById('diagnosticBtn').disabled = true;
+                document.getElementById('checkBtn').disabled = true;
+                document.getElementById('fixBtn').disabled = true;
+                document.getElementById('signInBtn').textContent = '🔐 Sign In with Google';
+                document.getElementById('signInBtn').disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
