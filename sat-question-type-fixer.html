@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAT Question Type Direct Fixer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 18px;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .progress {
+            margin: 20px 0;
+            display: none;
+        }
+
+        .progress-bar {
+            height: 40px;
+            background: #e9ecef;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            width: 0%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .log {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 14px;
+            display: none;
+        }
+
+        .log-entry {
+            padding: 5px;
+            margin: 2px 0;
+            border-left: 3px solid #28a745;
+        }
+
+        .log-error {
+            border-left-color: #dc3545;
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 SAT Question Type Direct Fixer</h1>
+        
+        <div class="alert alert-info">
+            <strong>⚡ This tool will fix your 77 unknown questions</strong><br>
+            It will analyze each question's content and assign the correct type (Math, Reading, or Writing).
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalQuestions">0</div>
+                <div class="stat-label">Total Questions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="unknownQuestions">0</div>
+                <div class="stat-label">Unknown Type</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="fixedQuestions">0</div>
+                <div class="stat-label">Fixed</div>
+            </div>
+        </div>
+
+        <button id="scanBtn" class="btn">📊 Scan Database</button>
+        <button id="fixBtn" class="btn btn-danger" style="display: none;">🚀 Fix All Unknown Questions</button>
+
+        <div class="progress" id="progressDiv">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill">0%</div>
+            </div>
+        </div>
+
+        <div id="statusAlert" class="alert" style="display: none;"></div>
+
+        <div class="log" id="logDiv">
+            <h4>📝 Process Log:</h4>
+            <div id="logContent"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAv4Z5vAl8knY9RNs_U5VFObU3WKJGuxqg",
+            authDomain: "sat-education-platform.firebaseapp.com",
+            projectId: "sat-education-platform",
+            storageBucket: "sat-education-platform.appspot.com",
+            messagingSenderId: "135365605707",
+            appId: "1:135365605707:web:17e2a91f0db00c4f6259e5"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // DOM elements
+        const scanBtn = document.getElementById('scanBtn');
+        const fixBtn = document.getElementById('fixBtn');
+        const progressDiv = document.getElementById('progressDiv');
+        const progressFill = document.getElementById('progressFill');
+        const logDiv = document.getElementById('logDiv');
+        const logContent = document.getElementById('logContent');
+        const statusAlert = document.getElementById('statusAlert');
+        const totalQuestions = document.getElementById('totalQuestions');
+        const unknownQuestions = document.getElementById('unknownQuestions');
+        const fixedQuestions = document.getElementById('fixedQuestions');
+
+        let questionsToFix = [];
+
+        function addLog(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type === 'error' ? 'log-error' : ''}`;
+            const time = new Date().toLocaleTimeString();
+            entry.textContent = `[${time}] ${message}`;
+            logContent.appendChild(entry);
+            logContent.scrollTop = logContent.scrollHeight;
+        }
+
+        function detectQuestionType(question) {
+            const text = (question.question || '').toLowerCase();
+            const answers = [
+                question.answerA || '',
+                question.answerB || '',
+                question.answerC || '',
+                question.answerD || ''
+            ].join(' ').toLowerCase();
+            
+            const fullContent = text + ' ' + answers;
+
+            // Math patterns - very comprehensive
+            const mathPatterns = [
+                /\d+\s*[+\-*/÷]\s*\d+/,  // Basic arithmetic
+                /[xy]\s*[=<>]/,          // Variables and equations
+                /\$\d+/,                 // Money
+                /\d+%/,                  // Percentages
+                /angle|triangle|circle|radius|diameter|area|volume|perimeter/,
+                /equation|solve|calculate|compute|find the value/,
+                /graph|function|slope|intercept|coordinate/,
+                /probability|statistics|mean|median|average/,
+                /ratio|proportion|rate/,
+                /quadratic|polynomial|factor/,
+                /geometric|arithmetic sequence/,
+                /farmer.*pounds?|produced?/  // Word problems about quantities
+            ];
+
+            // Reading patterns
+            const readingPatterns = [
+                /passage|excerpt|text|author/,
+                /according to|suggests that|implies/,
+                /main idea|central theme|purpose/,
+                /tone|mood|attitude/,
+                /infer|conclude|deduce/,
+                /paragraph|line \d+|lines \d+-\d+/,
+                /characteriz|narrative|literary/
+            ];
+
+            // Writing patterns
+            const writingPatterns = [
+                /sentence|grammar|punctuation/,
+                /which choice|underlined/,
+                /transition|combine|revise/,
+                /clarity|concise|effective/,
+                /no change|delete|add/,
+                /comma|semicolon|colon|apostrophe/,
+                /subject-verb|pronoun|modifier/
+            ];
+
+            // Check patterns
+            for (let pattern of mathPatterns) {
+                if (pattern.test(fullContent)) {
+                    return 'Math';
+                }
+            }
+
+            for (let pattern of readingPatterns) {
+                if (pattern.test(fullContent)) {
+                    return 'Reading';
+                }
+            }
+
+            for (let pattern of writingPatterns) {
+                if (pattern.test(fullContent)) {
+                    return 'Writing';
+                }
+            }
+
+            // Default fallback based on question length and structure
+            if (text.length > 200) {
+                return 'Reading';  // Long questions are often reading
+            } else if (fullContent.includes('which') || fullContent.includes('best')) {
+                return 'Writing';  // Choice-based questions often writing
+            } else {
+                return 'Math';  // Short computational questions
+            }
+        }
+
+        async function scanDatabase() {
+            scanBtn.disabled = true;
+            logDiv.style.display = 'block';
+            addLog('Starting database scan...');
+
+            try {
+                const snapshot = await db.collection('satQuestions').get();
+                const allQuestions = [];
+                let unknownCount = 0;
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const question = {
+                        id: doc.id,
+                        ...data
+                    };
+                    allQuestions.push(question);
+                    
+                    if (!data.type || data.type === 'Unknown') {
+                        unknownCount++;
+                        questionsToFix.push(question);
+                    }
+                });
+
+                totalQuestions.textContent = allQuestions.length;
+                unknownQuestions.textContent = unknownCount;
+
+                addLog(`Found ${allQuestions.length} total questions`);
+                addLog(`Found ${unknownCount} questions needing type assignment`);
+
+                if (unknownCount > 0) {
+                    fixBtn.style.display = 'block';
+                    statusAlert.className = 'alert alert-danger';
+                    statusAlert.innerHTML = `<strong>⚠️ Action Required:</strong> ${unknownCount} questions need type assignment. Click "Fix All Unknown Questions" to proceed.`;
+                    statusAlert.style.display = 'block';
+                } else {
+                    statusAlert.className = 'alert alert-success';
+                    statusAlert.innerHTML = '<strong>✅ All Good!</strong> All questions have proper types assigned.';
+                    statusAlert.style.display = 'block';
+                }
+
+            } catch (error) {
+                addLog(`Error: ${error.message}`, 'error');
+                statusAlert.className = 'alert alert-danger';
+                statusAlert.innerHTML = `<strong>❌ Error:</strong> ${error.message}`;
+                statusAlert.style.display = 'block';
+            }
+
+            scanBtn.disabled = false;
+        }
+
+        async function fixAllQuestions() {
+            if (!confirm(`This will update ${questionsToFix.length} questions. Continue?`)) {
+                return;
+            }
+
+            fixBtn.disabled = true;
+            progressDiv.style.display = 'block';
+            let fixed = 0;
+
+            addLog(`Starting to fix ${questionsToFix.length} questions...`);
+
+            for (let i = 0; i < questionsToFix.length; i++) {
+                const question = questionsToFix[i];
+                const detectedType = detectQuestionType(question);
+
+                try {
+                    await db.collection('satQuestions').doc(question.id).update({
+                        type: detectedType
+                    });
+
+                    fixed++;
+                    fixedQuestions.textContent = fixed;
+                    
+                    const percent = Math.round((fixed / questionsToFix.length) * 100);
+                    progressFill.style.width = percent + '%';
+                    progressFill.textContent = percent + '%';
+
+                    addLog(`Fixed question ${fixed}/${questionsToFix.length}: Type set to ${detectedType}`);
+
+                } catch (error) {
+                    addLog(`Error fixing question ${question.id}: ${error.message}`, 'error');
+                }
+
+                // Add small delay to prevent overwhelming Firebase
+                if (i % 10 === 0) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+            }
+
+            statusAlert.className = 'alert alert-success';
+            statusAlert.innerHTML = `<strong>✅ Complete!</strong> Successfully updated ${fixed} questions. Click "Scan Database" to verify.`;
+            statusAlert.style.display = 'block';
+
+            addLog(`Process complete! Fixed ${fixed} questions.`);
+            fixBtn.disabled = false;
+            
+            // Reset for next scan
+            questionsToFix = [];
+            unknownQuestions.textContent = '0';
+        }
+
+        // Event listeners
+        scanBtn.addEventListener('click', scanDatabase);
+        fixBtn.addEventListener('click', fixAllQuestions);
+
+        // Auto-scan on load
+        window.addEventListener('load', () => {
+            setTimeout(scanDatabase, 1000);
+        });
+    </script>
+</body>
+</html>
