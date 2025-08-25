@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Education Platform Suite - SAT Prep & High School Learning</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity 0.3s;
+        }
+
+        .nav-links a:hover {
+            opacity: 0.8;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-outline {
+            padding: 8px 20px;
+            border: 2px solid white;
+            border-radius: 25px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-outline:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn-filled {
+            padding: 8px 20px;
+            background: white;
+            border-radius: 25px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.3s;
+        }
+
+        .btn-filled:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: white;
+            border-radius: 30px;
+            padding: 60px;
+            margin: 120px auto 40px;
+            max-width: 1200px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+        }
+
+        .hero h1 {
+            color: #667eea;
+            font-size: 48px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .hero .subtitle {
+            color: #666;
+            font-size: 20px;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 48px;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* Platforms Grid */
+        .platforms {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 40px;
+            margin: 60px auto;
+            max-width: 1200px;
+            padding: 0 20px;
+        }
+
+        .platform-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .platform-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .platform-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .platform-title {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .platform-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin: 20px 0;
+        }
+
+        .feature-list li {
+            padding: 10px 0;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feature-list li::before {
+            content: "✅";
+            color: #4CAF50;
+        }
+
+        .platform-btn {
+            display: inline-block;
+            width: 100%;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            text-align: center;
+            transition: transform 0.3s;
+            margin-top: 20px;
+        }
+
+        .platform-btn:hover {
+            transform: translateY(-3px);
+        }
+
+        .platform-btn.secondary {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        /* Features Section */
+        .features-section {
+            background: white;
+            padding: 60px 20px;
+            margin: 40px 0;
+        }
+
+        .features-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .features-title {
+            text-align: center;
+            font-size: 36px;
+            color: #333;
+            margin-bottom: 50px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-item {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .feature-name {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .feature-desc {
+            color: #666;
+            line-height: 1.5;
+        }
+
+        /* Admin Section */
+        .admin-section {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .admin-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .admin-title {
+            font-size: 32px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .admin-links {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .admin-btn {
+            padding: 12px 30px;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 25px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .admin-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(0, 0, 0, 0.2);
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 60px;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .footer-links a:hover {
+            opacity: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                padding: 40px 20px;
+            }
+
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .platforms {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading" id="loadingScreen">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <span>🎓</span>
+                <span>EduPlatform</span>
+            </a>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#platforms">Platforms</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#admin">Admin</a></li>
+                    <li><a href="#about">About</a></li>
+                </ul>
+            </nav>
+            <div class="auth-buttons">
+                <a href="#" class="btn-outline" onclick="showLogin()">Login</a>
+                <a href="sat-prep-v4.html" class="btn-filled">Get Started</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>
+            <span>🎓</span>
+            Education Platform Suite
+        </h1>
+        <p class="subtitle">
+            Comprehensive learning solutions for SAT preparation and high school education.<br>
+            Interactive, engaging, and designed for student success.
+        </p>
+        
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number">2</div>
+                <div class="stat-label">Platforms</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">6</div>
+                <div class="stat-label">Subjects</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">2</div>
+                <div class="stat-label">Quiz Formats</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">Secure</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Platforms Section -->
+    <section class="platforms" id="platforms">
+        <div class="platform-card">
+            <div class="platform-icon">🎯</div>
+            <h2 class="platform-title">SAT Prep Platform</h2>
+            <p class="platform-description">
+                Focused test preparation with traditional quizzes and engaging Jeopardy-style games.
+            </p>
+            <ul class="feature-list">
+                <li>Reading & Math preparation</li>
+                <li>Traditional + Jeopardy formats</li>
+                <li>Score tracking & analytics</li>
+                <li>Practice test simulations</li>
+                <li>Progress monitoring</li>
+                <li>254 practice questions</li>
+            </ul>
+            <a href="sat-prep-v4.html" class="platform-btn" onclick="navigateTo('sat-prep-v4.html')">
+                Launch SAT Prep →
+            </a>
+        </div>
+
+        <div class="platform-card">
+            <div class="platform-icon">📚</div>
+            <h2 class="platform-title">High School Learning</h2>
+            <p class="platform-description">
+                Comprehensive curriculum support across all major high school subjects.
+            </p>
+            <ul class="feature-list">
+                <li>6 core subjects covered</li>
+                <li>Interactive labs & simulations</li>
+                <li>Assignment management</li>
+                <li>Grade tracking</li>
+                <li>Study planning tools</li>
+                <li>Coming Soon!</li>
+            </ul>
+            <a href="#" class="platform-btn secondary" onclick="comingSoon()">
+                Coming Soon
+            </a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section" id="features">
+        <div class="features-container">
+            <h2 class="features-title">Platform Features</h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-icon">📊</div>
+                    <h3 class="feature-name">Real-time Analytics</h3>
+                    <p class="feature-desc">Track progress with detailed performance metrics and insights</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🎮</div>
+                    <h3 class="feature-name">Gamified Learning</h3>
+                    <p class="feature-desc">Engage with interactive Jeopardy-style quiz games</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">📱</div>
+                    <h3 class="feature-name">Mobile Responsive</h3>
+                    <p class="feature-desc">Learn anywhere with fully responsive design</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">☁️</div>
+                    <h3 class="feature-name">Cloud Storage</h3>
+                    <p class="feature-desc">All progress saved automatically in the cloud</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🔒</div>
+                    <h3 class="feature-name">Secure Authentication</h3>
+                    <p class="feature-desc">Google Sign-in for secure access</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">📈</div>
+                    <h3 class="feature-name">Progress Tracking</h3>
+                    <p class="feature-desc">Monitor improvement over time</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Admin Section -->
+    <section class="admin-section" id="admin">
+        <div class="admin-card">
+            <h2 class="admin-title">🛠️ Administrative Tools</h2>
+            <p>Manage your education platform with powerful admin tools</p>
+            <div class="admin-links">
+                <a href="comprehensive-admin-dashboard.html" class="admin-btn">
+                    Admin Dashboard
+                </a>
+                <a href="firebase-question-counter.html" class="admin-btn">
+                    Question Manager
+                </a>
+                <a href="sat-question-type-fixer.html" class="admin-btn">
+                    Database Tools
+                </a>
+                <a href="sat-complete-uploader-212.html" class="admin-btn">
+                    Question Uploader
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="#about">About</a>
+            <a href="#privacy">Privacy</a>
+            <a href="#terms">Terms</a>
+            <a href="#contact">Contact</a>
+            <a href="https://github.com/svenky3/eduPlatform" target="_blank">GitHub</a>
+        </div>
+        <p>&copy; 2024 Education Platform Suite. All rights reserved.</p>
+    </footer>
+
+    <!-- Firebase SDK (for future authentication) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAv4Z5vAl8knY9RNs_U5VFObU3WKJGuxqg",
+            authDomain: "sat-education-platform.firebaseapp.com",
+            projectId: "sat-education-platform",
+            storageBucket: "sat-education-platform.appspot.com",
+            messagingSenderId: "135365605707",
+            appId: "1:135365605707:web:17e2a91f0db00c4f6259e5"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // Smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Navigation function with loading animation
+        function navigateTo(url) {
+            document.getElementById('loadingScreen').style.display = 'flex';
+            setTimeout(() => {
+                window.location.href = url;
+            }, 500);
+        }
+
+        // Coming soon alert
+        function comingSoon() {
+            alert('🚀 High School Learning Platform coming soon!\n\nWe are working hard to bring you comprehensive learning tools for all high school subjects.\n\nStay tuned!');
+        }
+
+        // Show login modal (simplified version)
+        function showLogin() {
+            if (confirm('Would you like to sign in with Google?')) {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                auth.signInWithPopup(provider)
+                    .then((result) => {
+                        alert(`Welcome, ${result.user.displayName}!`);
+                        window.location.href = 'sat-prep-v4.html';
+                    })
+                    .catch((error) => {
+                        console.error('Login error:', error);
+                        alert('Login failed. Please try again.');
+                    });
+            }
+        }
+
+        // Check authentication state
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // Update UI for logged-in user
+                const authButtons = document.querySelector('.auth-buttons');
+                authButtons.innerHTML = `
+                    <span style="color: white; margin-right: 15px;">👤 ${user.displayName || user.email}</span>
+                    <a href="#" class="btn-outline" onclick="signOut()">Sign Out</a>
+                    <a href="sat-prep-v4.html" class="btn-filled">Dashboard</a>
+                `;
+            }
+        });
+
+        // Sign out function
+        function signOut() {
+            auth.signOut().then(() => {
+                window.location.reload();
+            });
+        }
+
+        // Animate stats on scroll
+        const observerOptions = {
+            threshold: 0.5,
+            rootMargin: '0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animation = 'fadeInUp 0.6s ease-out';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.stat, .feature-item').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Add fade-in animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
