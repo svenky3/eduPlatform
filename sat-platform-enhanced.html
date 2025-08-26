@@ -289,12 +289,14 @@
 
         .question-text {
             font-size: 18px;
-            line-height: 1.6;
+            line-height: 1.8;
             color: #333;
             margin-bottom: 25px;
             padding: 20px;
             background: #f9fafb;
             border-radius: 10px;
+            max-height: 300px;
+            overflow-y: auto;
         }
 
         .answers {
@@ -688,6 +690,11 @@
 
         <!-- Dashboard -->
         <div class="dashboard" id="dashboardScreen">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <button onclick="debugQuestions()" style="padding: 5px 10px; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 5px; cursor: pointer; font-size: 12px;">
+                    🔍 Debug: Check Questions
+                </button>
+            </div>
             <div class="sections-grid">
                 <!-- Math Section -->
                 <div class="section-card">
@@ -799,6 +806,10 @@
                     <div class="detail-label">Incorrect</div>
                 </div>
                 <div class="score-detail">
+                    <div class="detail-value" id="unansweredCount">0</div>
+                    <div class="detail-label">Unanswered</div>
+                </div>
+                <div class="score-detail">
                     <div class="detail-value" id="totalQuestions">20</div>
                     <div class="detail-label">Total</div>
                 </div>
@@ -865,14 +876,26 @@
 
         // Initialize
         window.onload = function() {
+            console.log('Platform loading...');
             updateDateTime();
             setInterval(updateDateTime, 60000);
             
+            // Check Firebase connection
+            if (typeof firebase === 'undefined') {
+                console.error('Firebase not loaded!');
+                alert('Firebase failed to load. Please refresh the page.');
+                return;
+            }
+            
+            console.log('Firebase initialized:', firebaseConfig.projectId);
+            
             auth.onAuthStateChanged((user) => {
                 if (user) {
+                    console.log('User authenticated:', user.uid);
                     currentUser = user;
                     showDashboard();
                 } else {
+                    console.log('No user, signing in anonymously...');
                     // For testing, auto-sign in anonymously
                     signInAnonymously();
                 }
@@ -934,37 +957,89 @@
         // Load questions from Firebase
         async function loadQuestions() {
             try {
+                console.log('Loading questions from Firebase...');
                 const snapshot = await db.collection('satQuestions').get();
                 allQuestions = [];
                 
                 snapshot.forEach(doc => {
                     const data = doc.data();
-                    allQuestions.push({
-                        id: doc.id,
-                        ...data
-                    });
+                    // Ensure each question has required fields
+                    if (data.question && data.type) {
+                        allQuestions.push({
+                            id: doc.id,
+                            question: data.question,
+                            answerA: data.answerA || data.A || '',
+                            answerB: data.answerB || data.B || '',
+                            answerC: data.answerC || data.C || '',
+                            answerD: data.answerD || data.D || '',
+                            correctAnswer: data.correctAnswer || data.correct || 'A',
+                            type: data.type,
+                            difficulty: data.difficulty || 'Medium',
+                            explanation: data.explanation || `The correct answer is ${data.correctAnswer || 'A'}`
+                        });
+                    }
                 });
+
+                console.log(`Loaded ${allQuestions.length} questions from Firebase`);
 
                 // Count questions by type
                 const counts = {
                     Math: 0,
                     Reading: 0,
-                    Writing: 0
+                    Writing: 0,
+                    Unknown: 0
                 };
 
                 allQuestions.forEach(q => {
-                    if (q.type in counts) {
-                        counts[q.type]++;
+                    const type = q.type || 'Unknown';
+                    if (type in counts) {
+                        counts[type]++;
+                    } else {
+                        counts.Unknown++;
                     }
                 });
 
-                // Update dashboard
-                document.getElementById('mathCount').textContent = `${counts.Math} questions available`;
-                document.getElementById('readingCount').textContent = `${counts.Reading} questions available`;
-                document.getElementById('writingCount').textContent = `${counts.Writing} questions available`;
+                console.log('Question counts:', counts);
+
+                // Update dashboard with actual counts or show warning
+                if (counts.Math === 0 && counts.Reading === 0 && counts.Writing === 0) {
+                    if (counts.Unknown > 0) {
+                        alert(`Warning: ${counts.Unknown} questions found but they have no proper type assigned. Please fix question types in the database.`);
+                    } else {
+                        alert('No questions found in the database. Please check your Firebase connection and data.');
+                    }
+                }
+                
+                document.getElementById('mathCount').textContent = counts.Math > 0 ? 
+                    `${counts.Math} questions available` : 'No questions available';
+                document.getElementById('readingCount').textContent = counts.Reading > 0 ? 
+                    `${counts.Reading} questions available` : 'No questions available';
+                document.getElementById('writingCount').textContent = counts.Writing > 0 ? 
+                    `${counts.Writing} questions available` : 'No questions available';
+
+                // Check for missing correct answers
+                let missingCorrectAnswers = 0;
+                allQuestions.forEach(q => {
+                    if (!q.correctAnswer || q.correctAnswer === '') {
+                        missingCorrectAnswers++;
+                        console.warn('Question missing correct answer:', q);
+                    }
+                });
+                
+                if (missingCorrectAnswers > 0) {
+                    console.warn(`WARNING: ${missingCorrectAnswers} questions have no correct answer set!`);
+                    alert(`Warning: ${missingCorrectAnswers} questions have no correct answer set. Scoring may not work properly.`);
+                }
+
+                // If no questions loaded from Firebase, show error
+                if (allQuestions.length === 0) {
+                    console.warn('No questions loaded from Firebase, using sample questions');
+                    loadSampleQuestions();
+                }
 
             } catch (error) {
-                console.error('Error loading questions:', error);
+                console.error('Error loading questions from Firebase:', error);
+                alert('Failed to load questions from database. Using sample questions.');
                 // Load sample questions for testing
                 loadSampleQuestions();
             }
@@ -972,28 +1047,23 @@
 
         // Load sample questions for testing
         function loadSampleQuestions() {
-            allQuestions = [
-                {
-                    id: '1',
-                    type: 'Math',
-                    question: 'If 2x + 3 = 15, what is the value of x?',
-                    answerA: '4',
-                    answerB: '6',
-                    answerC: '7',
-                    answerD: '9',
-                    correctAnswer: 'B',
-                    explanation: 'Solve for x: 2x + 3 = 15, so 2x = 12, therefore x = 6'
-                },
-                // Add more sample questions as needed
-            ];
-
-            // Duplicate questions to simulate full set
+            console.log('Loading sample questions for testing...');
+            
+            // Create proper sample questions with all required fields
             const mathQuestions = [];
+            const answers = ['A', 'B', 'C', 'D'];
+            
             for (let i = 0; i < 148; i++) {
                 mathQuestions.push({
-                    ...allQuestions[0],
                     id: `math_${i}`,
-                    question: `Math Question ${i + 1}: If 2x + ${i} = ${15 + i}, what is x?`,
+                    type: 'Math',
+                    question: `Math Question ${i + 1}: If 2x + ${i} = ${15 + i}, what is the value of x?`,
+                    answerA: `${Math.floor(Math.random() * 10)}`,
+                    answerB: `${Math.floor((15 + i - i) / 2)}`,  // Correct answer
+                    answerC: `${Math.floor(Math.random() * 10 + 10)}`,
+                    answerD: `${Math.floor(Math.random() * 10 + 15)}`,
+                    correctAnswer: 'B',
+                    explanation: `Solve for x: 2x + ${i} = ${15 + i}, so 2x = ${15}, therefore x = ${15/2}`
                 });
             }
 
@@ -1002,13 +1072,13 @@
                 readingQuestions.push({
                     id: `reading_${i}`,
                     type: 'Reading',
-                    question: `Reading Question ${i + 1}: What is the main idea of this passage?`,
-                    answerA: 'Option A',
-                    answerB: 'Option B',
-                    answerC: 'Option C',
-                    answerD: 'Option D',
-                    correctAnswer: 'A',
-                    explanation: 'The main idea is clearly stated in the first paragraph.'
+                    question: `Reading Question ${i + 1}: Based on the passage, what is the author's main argument?`,
+                    answerA: 'The author argues for environmental protection',
+                    answerB: 'The author discusses economic policies',
+                    answerC: 'The author examines social changes',
+                    answerD: 'The author analyzes historical events',
+                    correctAnswer: answers[Math.floor(Math.random() * 4)],
+                    explanation: 'The main idea is clearly stated in the opening paragraph.'
                 });
             }
 
@@ -1017,17 +1087,18 @@
                 writingQuestions.push({
                     id: `writing_${i}`,
                     type: 'Writing',
-                    question: `Writing Question ${i + 1}: Which choice best combines the sentences?`,
-                    answerA: 'Option A',
-                    answerB: 'Option B',
-                    answerC: 'Option C',
-                    answerD: 'Option D',
-                    correctAnswer: 'C',
-                    explanation: 'Option C provides the most concise and clear combination.'
+                    question: `Writing Question ${i + 1}: Which choice provides the most effective transition?`,
+                    answerA: 'However, the results were unexpected.',
+                    answerB: 'Furthermore, the data supported this.',
+                    answerC: 'In conclusion, we can see that.',
+                    answerD: 'Nevertheless, researchers continued.',
+                    correctAnswer: answers[Math.floor(Math.random() * 4)],
+                    explanation: 'This transition word best connects the ideas in the paragraph.'
                 });
             }
 
             allQuestions = [...mathQuestions, ...readingQuestions, ...writingQuestions];
+            console.log(`Loaded ${allQuestions.length} sample questions`);
 
             document.getElementById('mathCount').textContent = '148 questions available';
             document.getElementById('readingCount').textContent = '40 questions available';
@@ -1040,9 +1111,18 @@
             currentMode = mode;
             currentQuizQuestions = allQuestions.filter(q => q.type === section);
             
+            console.log(`Starting ${section} quiz with ${currentQuizQuestions.length} questions`);
+            
             if (currentQuizQuestions.length === 0) {
-                alert('No questions available for this section.');
+                alert(`No questions available for ${section} section. Please check if questions are loaded properly.`);
                 return;
+            }
+
+            // Check if questions have proper structure
+            const sampleQuestion = currentQuizQuestions[0];
+            if (!sampleQuestion.question || (!sampleQuestion.answerA && !sampleQuestion.A)) {
+                console.error('Questions may not be properly formatted:', sampleQuestion);
+                alert('Warning: Questions may not be properly formatted. Please check the database.');
             }
 
             // Shuffle questions for variety
@@ -1108,6 +1188,13 @@
         function displayQuestion() {
             const question = currentQuizQuestions[currentQuestionIndex];
             
+            if (!question) {
+                console.error('No question found at index:', currentQuestionIndex);
+                return;
+            }
+
+            console.log('Displaying question:', question);
+
             // Update progress
             document.getElementById('questionCounter').textContent = 
                 `${currentQuestionIndex + 1} / ${currentQuizQuestions.length}`;
@@ -1117,16 +1204,20 @@
                 `${((currentQuestionIndex + 1) / currentQuizQuestions.length) * 100}%`;
 
             // Display question text
-            document.getElementById('questionText').textContent = question.question || 'Question text not available';
+            const questionText = question.question || 'Question text not available';
+            document.getElementById('questionText').textContent = questionText;
 
             // Display answer options
             const answersContainer = document.getElementById('answersContainer');
             answersContainer.innerHTML = '';
 
             const options = ['A', 'B', 'C', 'D'];
+            let hasAnswers = false;
+            
             options.forEach(letter => {
-                const answerText = question[`answer${letter}`];
-                if (answerText) {
+                const answerText = question[`answer${letter}`] || question[letter];
+                if (answerText && answerText.trim() !== '') {
+                    hasAnswers = true;
                     const optionDiv = document.createElement('div');
                     optionDiv.className = 'answer-option';
                     optionDiv.dataset.letter = letter;
@@ -1172,6 +1263,12 @@
                 }
             });
 
+            // If no answers found, show error
+            if (!hasAnswers) {
+                answersContainer.innerHTML = '<p style="color: red;">No answer options available for this question.</p>';
+                console.error('No answers found for question:', question);
+            }
+
             // Show explanation in practice mode if answered
             if (currentMode === 'practice' && questionResults[currentQuestionIndex]) {
                 showExplanation();
@@ -1194,6 +1291,14 @@
         // Select answer
         function selectAnswer(letter, optionElement) {
             const question = currentQuizQuestions[currentQuestionIndex];
+            
+            // Make sure we have a valid correct answer
+            if (!question.correctAnswer) {
+                console.error('No correct answer set for this question!');
+                alert('Error: This question has no correct answer set. Please report this issue.');
+                return;
+            }
+            
             userAnswers[currentQuestionIndex] = letter;
             
             if (currentMode === 'practice') {
@@ -1203,6 +1308,8 @@
                     selected: letter,
                     correct: isCorrect
                 };
+
+                console.log(`Answer selected: ${letter}, Correct answer: ${question.correctAnswer}, Result: ${isCorrect ? 'CORRECT' : 'WRONG'}`);
 
                 // Update UI
                 document.querySelectorAll('.answer-option').forEach(option => {
@@ -1226,6 +1333,7 @@
                     option.classList.remove('selected');
                 });
                 optionElement.classList.add('selected');
+                console.log(`Test mode - Answer selected: ${letter}`);
             }
         }
 
@@ -1303,18 +1411,38 @@
         async function submitQuiz() {
             if (quizTimer) clearInterval(quizTimer);
 
-            // Calculate score
+            // Calculate score - only count answered questions
             let correct = 0;
+            let answered = 0;
+            let unanswered = 0;
+            
             currentQuizQuestions.forEach((question, index) => {
-                if (userAnswers[index] === question.correctAnswer) {
-                    correct++;
+                if (userAnswers[index] !== undefined) {
+                    answered++;
+                    if (userAnswers[index] === question.correctAnswer) {
+                        correct++;
+                    }
+                } else {
+                    unanswered++;
                 }
             });
 
-            const score = Math.round((correct / currentQuizQuestions.length) * 100);
+            // If no questions were answered, score is 0
+            const score = answered > 0 ? Math.round((correct / currentQuizQuestions.length) * 100) : 0;
+            const incorrect = answered - correct;
+            
             const timeSpent = Math.floor((new Date() - quizStartTime) / 1000);
             const minutes = Math.floor(timeSpent / 60);
             const seconds = timeSpent % 60;
+
+            console.log(`Quiz Results: Answered ${answered}, Correct ${correct}, Unanswered ${unanswered}`);
+
+            // Show warning if there are unanswered questions
+            if (unanswered > 0 && currentMode === 'test') {
+                if (!confirm(`You have ${unanswered} unanswered questions. Are you sure you want to submit?`)) {
+                    return;
+                }
+            }
 
             // Display results
             document.getElementById('quizScreen').style.display = 'none';
@@ -1322,7 +1450,8 @@
             
             document.getElementById('scoreDisplay').textContent = `${score}%`;
             document.getElementById('correctCount').textContent = correct;
-            document.getElementById('incorrectCount').textContent = currentQuizQuestions.length - correct;
+            document.getElementById('incorrectCount').textContent = incorrect;
+            document.getElementById('unansweredCount').textContent = unanswered;
             document.getElementById('totalQuestions').textContent = currentQuizQuestions.length;
             document.getElementById('timeSpent').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
 
@@ -1336,6 +1465,8 @@
                         mode: currentMode,
                         score: score,
                         correct: correct,
+                        incorrect: incorrect,
+                        unanswered: unanswered,
                         total: currentQuizQuestions.length,
                         timeSpent: timeSpent,
                         timestamp: firebase.firestore.FieldValue.serverTimestamp()
@@ -1376,6 +1507,44 @@
         // Retry quiz
         function retryQuiz() {
             startQuiz(currentSection, currentMode === 'review' ? 'test' : currentMode);
+        }
+
+        // Debug function to check loaded questions
+        function debugQuestions() {
+            console.log('=== DEBUG: Question Check ===');
+            console.log(`Total questions loaded: ${allQuestions.length}`);
+            
+            const types = {};
+            allQuestions.forEach(q => {
+                types[q.type] = (types[q.type] || 0) + 1;
+            });
+            console.log('Questions by type:', types);
+            
+            if (allQuestions.length > 0) {
+                console.log('Sample question structure:', allQuestions[0]);
+                console.log('First 3 questions:', allQuestions.slice(0, 3));
+            }
+            
+            // Create debug report
+            let report = `Questions Debug Report:\n`;
+            report += `Total: ${allQuestions.length}\n`;
+            report += `Math: ${types.Math || 0}\n`;
+            report += `Reading: ${types.Reading || 0}\n`;
+            report += `Writing: ${types.Writing || 0}\n`;
+            report += `Unknown: ${types.Unknown || 0}\n\n`;
+            
+            if (allQuestions.length > 0) {
+                report += `Sample Question:\n`;
+                const sample = allQuestions[0];
+                report += `- Question: ${sample.question ? sample.question.substring(0, 50) + '...' : 'NO QUESTION TEXT'}\n`;
+                report += `- Answer A: ${sample.answerA || sample.A || 'MISSING'}\n`;
+                report += `- Answer B: ${sample.answerB || sample.B || 'MISSING'}\n`;
+                report += `- Answer C: ${sample.answerC || sample.C || 'MISSING'}\n`;
+                report += `- Answer D: ${sample.answerD || sample.D || 'MISSING'}\n`;
+                report += `- Correct: ${sample.correctAnswer || 'NOT SET'}\n`;
+            }
+            
+            alert(report);
         }
 
         // Close modal when clicking outside
